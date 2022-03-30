@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.build.tailwind.css}">
+
+    <link rel="stylesheet" th:href="@{/css/style.dev.tailwind.css}">
+
+    <script type="text/javascript">
+        let username = document.getElementById("email");
+        let password = document.getElementById("password");
+        let loginButton = document.getElementById("login-button")
+        function init() {
+            username = document.getElementById("email");
+            password = document.getElementById("password");
+            loginButton = document.getElementById("login-button");
+            addEventListeners();
+        }
+
+        function addEventListeners() {
+
+            function login() {
+
+            }
+            loginButton.addEventListener("click", ev => {
+                login();
+            })
+        }
+
+
+    </script>
+
+
+</head>
+<body class="w-full h-full bg-black" onload="init()">
+<div class="h-full w-max">
+    <div class="w-500px h-400px object-center border-8 shadow-2xl bg-gray-100">
+        <div>
+            <input id="email" type="email" name="email">
+            <label for="email">Email</label>
+
+            <input type="password" id="password">
+            <label for="password">Password</label>
+
+            <button id="login-button">Login</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

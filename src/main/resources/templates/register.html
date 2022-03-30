@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register Page</title>
+
+    <!--    <link rel="stylesheet" th:href="@{/css/style.build.tailwind.css}">-->
+    <!--    <link rel="stylesheet" th:href="@{/css/style.dev.tailwind.css}">-->
+
+    <style>
+        .form-item {
+            margin: 20px;
+            font-size: xx-large;
+            font-weight: bold;
+            font-family: Aldhabi, Monaco, monospace;
+
+
+        }
+
+        .container1 {
+            object-position: center;
+            display: flow;
+        }
+
+    </style>
+
+    <script type="text/javascript" defer>
+        let baseUrl = "http://" + document.location.hostname + ":" + document.location.port;
+        let registerSlug = "/user/create";
+        let firstNameInput = document.getElementById("firstName");
+        let lastNameInput = document.getElementById("lastName");
+        let phoneNumberInput = document.getElementById("phoneNumber");
+        let userNameInput = document.getElementById("userName");
+        let emailInput = document.getElementById("email");
+        let registerButton = document.getElementById("registerButton");
+        let passwordInput = document.getElementById("password");
+
+        console.log(baseUrl);
+        console.log(baseUrl + registerSlug);
+
+        function init() {
+            firstNameInput = document.getElementById("firstName");
+            lastNameInput = document.getElementById("lastName");
+            phoneNumberInput = document.getElementById("phoneNumber");
+            userNameInput = document.getElementById("userName");
+            emailInput = document.getElementById("email");
+            registerButton = document.getElementById("registerButton");
+            passwordInput = document.getElementById("password");
+            addEventListeners();
+        }
+
+        function addEventListeners() {
+            registerButton.addEventListener("click", ev => {
+                if (ev.target === registerButton) {
+                    console.log("BEFORE SENDING THE REQUEST");
+                    register();
+                    console.log("AFTER SENDING THE REQUEST");
+                }
+            })
+        }
+
+        function constructUser() {
+
+            return {
+                first_name: firstNameInput.value,
+                last_name: lastNameInput.value,
+                email: emailInput.value,
+                user_name: userNameInput.value,
+                password: passwordInput.value,
+                phone_number: phoneNumberInput.value
+            };
+        }
+
+        function register() {
+            const userPostRequest = new XMLHttpRequest();
+            console.log(baseUrl + registerSlug);
+            userPostRequest.open("POST", baseUrl + registerSlug);
+            userPostRequest.setRequestHeader("Content-Type", "application/json");
+            userPostRequest.send(JSON.stringify(constructUser()));
+
+            userPostRequest.onreadystatechange = function () {
+                console.log(userPostRequest.responseText);
+            }
+        }
+
+    </script>
+
+</head>
+<body onload="init();" style="padding: 0; background-color: #686868;">
+
+<div class="container1" style="height: auto;
+ width: auto;
+  align-content: center;
+   vertical-align: center;
+    horiz-align: center; padding: 0">
+    <label for="firstName" class="form-item">First name:</label>
+    <input type="text" id="firstName" name="first_name"><br>
+
+    <label for="lastName" class="form-item">Last name:</label>
+    <input type="text" id="lastName" name="last_name"><br>
+
+    <label for="email" class="form-item">Email:</label>
+    <input type="email" id="email" name="email"><br>
+
+    <label for="password" class="form-item">Email:</label>
+    <input type="password" id="password" name="password"><br>
+
+
+    <label for="userName" class="form-item">Username:</label>
+    <input type="text" id="userName" name="user_name"><br>
+
+    <label for="phoneNumber" class="form-item">Phone Number:</label>
+    <input type="text" id="phoneNumber" name="phone_number"><br>
+
+    <button id="registerButton" class="object-center" style="background-color: cornflowerblue">Register</button>
+</div>
+
+
+</body>
+</html>
