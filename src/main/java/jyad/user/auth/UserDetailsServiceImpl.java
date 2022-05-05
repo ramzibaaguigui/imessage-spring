@@ -8,6 +8,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -24,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UserDetails userDetails =
                 org.springframework.security.core.userdetails.User.withUsername(user.getUserName())
                         .password(user.getPassword())
-                        .roles(Roles.ROLE_USER)
+                        .roles()
                         .build();
         return userDetails;
 

@@ -1,7 +1,7 @@
 package jyad.user;
 
+import jyad.discussion.Discussion;
 import jyad.user.auth.UserAuthService;
-import jyad.user.utils.AuthConstants;
 import jyad.user.utils.UserValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,14 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Level;
 
 @Controller
+@CrossOrigin(origins = "*")
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
@@ -34,6 +31,8 @@ public class UserController {
 
     @PostMapping("/user/create")
     public ResponseEntity<?> createUser(@RequestBody User user) {
+        LOGGER.info("Just received a user post request ");
+        LOGGER.info(user.toString());
         if (userValidator.validateUserRegistration(user) && user.passwordMeetsRequirements()) {
             LOGGER.info("user creation received, request body:\n" + user
             );
@@ -45,25 +44,12 @@ public class UserController {
         return ResponseEntity.badRequest().body("INVALID_CREDENTIALS");
     }
 
-    @PostMapping("/user/authenticate")
-    public ResponseEntity<?> authenticateUser(@RequestBody User user,
-                                              HttpServletRequest httpServletRequest,
-                                              HttpServletResponse response) {
-        User authUser = userValidator.validateUserAuthentication(user);
-        if (authUser != null) {
-            String authToken = userAuthService.generateAuthToken(user);
-            Cookie authTokenCookie = new Cookie(AuthConstants.AUTH_TOKEN, authToken);
-            authTokenCookie.setMaxAge(AuthConstants.DURATION_WEEK);
-            response.addCookie(authTokenCookie);
-            return ResponseEntity.ok(authUser);
-        }
-        return ResponseEntity.badRequest().body("INVALID_CREDENTIALS");
-    }
-
 
     @GetMapping("/user/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
+        LOGGER.info("Recieved a request for user with id " + id);
         User user = userService.getUserById(id);
+        LOGGER.info(String.format("User with id %d found", id));
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -132,5 +118,16 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("user/{userId}/discussions/get")
+    public ResponseEntity<?> getUserDiscussions(@PathVariable Long userId) {
+        List<Discussion> userDiscussions = userService.getUserDiscussions(userId);
+        if (Objects.nonNull(userDiscussions)) {
+            return ResponseEntity.ok(userDiscussions);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
 }

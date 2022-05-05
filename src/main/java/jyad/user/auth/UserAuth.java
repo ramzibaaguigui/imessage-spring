@@ -43,5 +43,4 @@ public class UserAuth {
     private String token;
 
 
-
 }

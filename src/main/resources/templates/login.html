@@ -11,9 +11,13 @@
     <link rel="stylesheet" th:href="@{/css/style.dev.tailwind.css}">
 
     <script type="text/javascript">
+        let baseUrl = "http://" + document.location.hostname + ":" + document.location.port;
+        let authSlug = "/user/authenticate";
+
         let username = document.getElementById("email");
         let password = document.getElementById("password");
         let loginButton = document.getElementById("login-button")
+
         function init() {
             username = document.getElementById("email");
             password = document.getElementById("password");
@@ -24,8 +28,24 @@
         function addEventListeners() {
 
             function login() {
+                function buildUser() {
+                    return {
+                        user_name: username.value,
+                        password: password.value
+                    };
+                }
+
+                let request = new XMLHttpRequest();
+                request.open("POST", baseUrl + authSlug);
+                request.setRequestHeader("Content-Type", "application/json");
+                request.send(JSON.stringify(buildUser()));
+
+                request.onreadystatechange = function () {
+                    console.log(request.responseText);
+                }
 
             }
+
             loginButton.addEventListener("click", ev => {
                 login();
             })

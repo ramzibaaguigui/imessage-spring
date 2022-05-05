@@ -2,8 +2,8 @@ package jyad.message;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jyad.user.User;
 import jyad.discussion.Discussion;
+import jyad.user.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -44,7 +44,6 @@ public class Message {
     @JoinColumn(name = "discussion_id")
     @JsonIgnore
     private Discussion discussion;
-
 
 
 }

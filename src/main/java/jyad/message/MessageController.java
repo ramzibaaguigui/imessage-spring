@@ -4,7 +4,6 @@ import jyad.discussion.DiscussionService;
 import jyad.message.payload.MessageSetGetRequest;
 import jyad.message.payload.MessageSetPostRequest;
 import jyad.user.UserService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

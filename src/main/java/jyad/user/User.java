@@ -3,6 +3,7 @@ package jyad.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jyad.discussion.Discussion;
 import jyad.user.auth.Roles;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Indexed;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
@@ -31,28 +33,28 @@ public class User {
 
 
     @Id
-    @Column(name = "user_id")
+    @Column(name = "user_id", unique = true)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonProperty("user_id")
+    @JsonIgnore
     private Long id;
 
     @Column(name = "last_name")
     @JsonProperty("last_name")
     private String lastName;
 
-    @Column(name = "phone_number")
-    @JsonProperty("phone_number")
+    @Column(name = "phone_number", unique = true)
+    @JsonProperty(value = "phone_number", access = JsonProperty.Access.WRITE_ONLY)
     private String phoneNumber;
 
     @Column(name = "image_url")
     @JsonProperty("image_url")
     private String imageUrl;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     @JsonProperty("email")
     private String email;
 
-    @Column(name = "user_name")
+    @Column(name = "user_name", unique = true)
     @JsonProperty("user_name")
     private String userName;
 
@@ -97,6 +99,13 @@ public class User {
         } catch (Exception exception) {
             return false;
         }
+    }
+
+    @JsonIgnore
+    public Set<String> getRoleNames() {
+        return this.roles.stream()
+                .map(Roles.Role::getRoleName)
+                .collect(Collectors.toSet());
     }
 
     @Override

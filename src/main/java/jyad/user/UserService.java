@@ -80,6 +80,11 @@ public class UserService {
 
     }
 
+    public List<Discussion> getUserDiscussions(Long userId) {
+        Optional<User> user = userRepository.getUserById(userId);
+        return user.map(User::getDiscussions).orElse(null);
+    }
+
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
