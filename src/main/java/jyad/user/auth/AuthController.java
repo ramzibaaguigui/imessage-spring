@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 
 
 @Controller
-@CrossOrigin(origins = "*")
 public class AuthController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
@@ -40,10 +39,7 @@ public class AuthController {
         User authUser = userValidator.validateUserAuthentication(user);
         if (authUser != null) {
             LOGGER.trace(authUser.toString());
-            // String authToken = userAuthService.generateAuthToken(user);
-            // Cookie authTokenCookie = new Cookie(AuthConstants.AUTH_TOKEN, authToken);
-            // authTokenCookie.setMaxAge(AuthConstants.DURATION_WEEK);
-            // response.addCookie(authTokenCookie);
+
             return ResponseEntity.ok(authUser);
         }
         LOGGER.debug("User is null");
