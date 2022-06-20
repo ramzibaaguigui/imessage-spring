@@ -3,6 +3,7 @@ package jyad.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jyad.discussion.Discussion;
+import jyad.message.payload.MessagePayload;
 import jyad.user.User;
 import lombok.*;
 
@@ -45,5 +46,12 @@ public class Message {
     @JsonIgnore
     private Discussion discussion;
 
-
+    public MessagePayload toPayload() {
+        return MessagePayload.create()
+                .withId(getId())
+                .withContent(getContent())
+                .sentAt(getSentAt())
+                .updatedAt(getUpdatedAt())
+                .senderUsername(getSender().getUserName());
+    }
 }

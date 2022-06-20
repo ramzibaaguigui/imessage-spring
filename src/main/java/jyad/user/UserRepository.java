@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -37,9 +38,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select (count(u) > 0) from User u where u.email = ?1 or u.userName = ?2")
     Boolean existsByEmailOrUserName(String email, String username);
 
-    Optional<User> findTopByUserNameAndPassword(String userName, String password);
+    @Query("select u from User u where u.userName = ?1")
+    Optional<User> getUserByUserName(String username);
 
-    Optional<User> findFirstByUserNameAndPassword(String username, String password);
+    @Query("select u from User u where u.userName in ?1")
+    List<User> getUsersByUserNameIn(Set<String> usernames);
 
-    User getUsersByUserNameOrEmail(String username, String email);
 }

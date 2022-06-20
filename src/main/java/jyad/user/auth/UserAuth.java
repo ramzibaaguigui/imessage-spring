@@ -1,46 +1,64 @@
 package jyad.user.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jyad.user.User;
+import jyad.user.auth.config.TokenDuration;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.Instant;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 
 @Entity
 @Table(name = "user_auth")
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-@Setter
 public class UserAuth {
-    // This class contains the information related to some authentication
-    // It contains the user id
-    /// Alongside some other important staff
-    // like the expiration date of the auth
-    // and a lot of staff
-    // This is primarily written by me without using spring security framework
-    // But that is absolutely going to be easily implemented with SpringSecurity
-    // ans UserDetailsService
-    // You just need to write an implementation for it
-    // And yeah here we go
+
+
+    private UserAuth(User user, String token, Instant issuedAt, Instant expireAt) {
+        this.authUser = user;
+        this.authToken = token;
+        this.issuedAt = issuedAt;
+        this.expireAt = expireAt;
+    }
 
     @Id
-    @JsonProperty("auth_id")
-    @Column(name = "auth_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", unique = true, updatable = false, nullable = false)
+    @JsonIgnore
     private Long id;
 
 
-    // THIS COULD BE CHANGED LATER
     @ManyToOne
-    @JoinColumn(name = "auth_user_user_id")
+    @JoinColumn(name = "auth_user_user_id", updatable = false, nullable = false)
     @JsonProperty("auth_user")
-
     private User authUser;
 
+    @Column(name = "auth_token", unique = true, nullable = false, updatable = false)
     @JsonProperty("auth_token")
-    @Column(name = "auth_token")
-    private String token;
+    private String authToken;
 
+
+    @Column(name = "issued_at")
+    @JsonProperty("issued_at")
+    private Instant issuedAt;
+
+
+    @Column(name = "expires_at")
+    @JsonProperty("expires_at")
+    private Instant expireAt;
+
+    @JsonIgnore
+    @Column(name = "auth_is_valid", nullable = false)
+    private Boolean authIsValid = true;
+
+    static UserAuth forUser(User user, String authToken, Instant issuedAt, Instant expireAt) {
+        return new UserAuth(user, authToken, issuedAt, expireAt);
+    }
 
 }

@@ -1,6 +1,7 @@
 package jyad.discussion;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jyad.message.Message;
 import jyad.user.User;
 import lombok.AllArgsConstructor;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,23 +22,26 @@ public class Discussion {
 
     @Id
     @Column(name = "discussion_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToMany(mappedBy = "discussions")
     @JsonIgnore
-    private List<User> users;
+    private Set<User> users = new HashSet<>();
 
     @Column(name = "discussion_name")
     private String name;
 
     @OneToMany(mappedBy = "discussion")
     @JsonIgnore
-    private Set<Message> messages;
+    private List<Message> messages = new ArrayList<>();
 
     @ManyToOne
+    @JsonProperty("created_by")
     private User createdBy;
 
     @Column(name = "created_at")
+    @JsonProperty("created_at")
     private Date createdAt;
 
 

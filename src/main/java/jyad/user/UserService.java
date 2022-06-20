@@ -2,13 +2,17 @@ package jyad.user;
 
 import jyad.discussion.Discussion;
 import jyad.discussion.DiscussionRepository;
+import jyad.user.auth.UserAuthService;
 import jyad.user.utils.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -25,6 +29,9 @@ public class UserService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    UserAuthService userAuthService;
+
 
     public User updateUserFirstName(Long userId, String firstName) {
 
@@ -35,6 +42,7 @@ public class UserService {
         }
         return null;
     }
+
     public User updateUserLastName(Long userId, String lastName) {
 
         Optional<User> user = userRepository.getUserById(userId);
@@ -85,6 +93,16 @@ public class UserService {
         return user.map(User::getDiscussions).orElse(null);
     }
 
+    public List<Discussion> getUserDiscussions(String authToken) {
+        User user = userAuthService.validateAuthentication(authToken);
+        System.out.println(user);
+        if (user == null) {
+            return null;
+        }
+
+        return user.getDiscussions();
+    }
+
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -100,6 +118,31 @@ public class UserService {
         return userRepository.getUsersByIdIn(userIds);
     }
 
+    @Nullable
+    public User findUserByUsernameAndPassword(String username, String password) {
+        Optional<User> authUser = userRepository.findAll()
+                .stream()
+                .filter(user -> (user.getUserName().equals(username) && passwordEncoder.matches(password, user.getPassword())))
+                .findAny();
+        if (authUser.isPresent()) {
+            return authUser.get();
+        }
+        return null;
+    }
 
+    public Set<User> searchUsers(String searchQuery) {
+        if (searchQuery == null) {
+            return null;
+        }
 
+        Set<User> users = userRepository.findAll()
+                .stream().filter(
+                        user ->
+                                (user.getFirstName().toLowerCase().contains(searchQuery)
+                                        || user.getLastName().toLowerCase().contains(searchQuery.toLowerCase())
+                                        || user.getUserName().toLowerCase().contains(searchQuery.toLowerCase())
+                                ))
+                .collect(Collectors.toSet());
+        return users;
+    }
 }

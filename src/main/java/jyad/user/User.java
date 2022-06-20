@@ -3,9 +3,8 @@ package jyad.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jyad.discussion.Discussion;
-import jyad.user.auth.Roles;
+import jyad.user.auth.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,7 @@ public class User {
     private String imageUrl;
 
     @Column(name = "email", unique = true)
-    @JsonProperty("email")
+    @JsonProperty(value = "email", access = JsonProperty.Access.WRITE_ONLY)
     private String email;
 
     @Column(name = "user_name", unique = true)
@@ -60,7 +60,7 @@ public class User {
 
     @Column(name = "password")
     @JsonProperty(
-            namespace = "password",
+            value = "password",
             access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
@@ -79,7 +79,7 @@ public class User {
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Roles.Role> roles;
+    private Set<Role> roles;
 
     public boolean equals(User user) {
         return this.getId().equals(user.getId());
@@ -104,7 +104,7 @@ public class User {
     @JsonIgnore
     public Set<String> getRoleNames() {
         return this.roles.stream()
-                .map(Roles.Role::getRoleName)
+                .map(Role::getName)
                 .collect(Collectors.toSet());
     }
 
@@ -122,5 +122,18 @@ public class User {
                 ", discussions=" + discussions +
                 ", roles=" + roles +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(userName, user.userName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userName);
     }
 }

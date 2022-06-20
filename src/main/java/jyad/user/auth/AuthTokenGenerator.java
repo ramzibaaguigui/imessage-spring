@@ -1,14 +1,15 @@
 package jyad.user.auth;
 
 import net.bytebuddy.utility.RandomString;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class AuthTokenGenerator {
-
     private static final int TOKEN_LENGTH = 64;
 
-    public String generateRandomAuthToken() {
+    public String generateRandomToken() {
         return RandomString.make(TOKEN_LENGTH);
     }
+
+
 }

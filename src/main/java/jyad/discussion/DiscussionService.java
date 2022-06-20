@@ -1,15 +1,18 @@
 package jyad.discussion;
 
 import jyad.date.TimeUtils;
+import jyad.discussion.payload.CreateDiscussionRequestPayload;
 import jyad.discussion.payload.DiscussionCreationRequest;
 import jyad.message.MessageRepository;
 import jyad.user.User;
 import jyad.user.UserRepository;
+import jyad.user.auth.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class DiscussionService {
@@ -25,6 +28,9 @@ public class DiscussionService {
 
     @Autowired
     TimeUtils time;
+
+    @Autowired
+    UserAuthService userAuthService;
 
     public Discussion getDiscussionById(Long id) {
         Optional<Discussion> discussion = discussionRepository.getDiscussionById(id);
@@ -90,6 +96,24 @@ public class DiscussionService {
         }
     }
 
+    public Discussion createDiscussion(String authToken, CreateDiscussionRequestPayload createDiscussionRequestPayload) {
+        List<User> users = userRepository.getUsersByUserNameIn(createDiscussionRequestPayload.getDiscussionUsersUsernames());
+        User createdBy = userAuthService.validateAuthentication(authToken);
+        if (createdBy == null) {
+            return null;
+        }
+
+        Discussion discussion = new Discussion();
+        discussion.addUser(createdBy);
+        for (User user: users) {
+            discussion.addUser(user);
+        }
+        discussion.setName(createDiscussionRequestPayload.getDiscussionName());
+        discussion.setCreatedBy(createdBy);
+        discussion.setCreatedAt(time.now());
+        return discussionRepository.save(discussion);
+    }
+
     public void removeDiscussion(String discussionId) {
         discussionRepository.deleteDiscussionById(discussionId);
     }
@@ -103,7 +127,7 @@ public class DiscussionService {
     }
 
 
-    public List<User> getDiscussionUsers(Long discussionId) {
+    public Set<User> getDiscussionUsers(Long discussionId) {
         Optional<Discussion> discussion = discussionRepository.getDiscussionById(discussionId);
         return discussion.map(Discussion::getUsers).orElse(null);
     }

@@ -33,12 +33,16 @@ public class MessageController {
         return ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("/messages/discussion/{discussionId}")
+    @GetMapping("/discussion/{discussionId}/messages")
     public ResponseEntity<?>
     getMessagesInDiscussion(@RequestBody MessageSetGetRequest messageSetRequest) {
         List<Message> messages = messageService.getMessageList(messageSetRequest);
         if (messages != null) {
-            return ResponseEntity.ok(messages);
+            return ResponseEntity.ok(
+                    messages.stream().map(
+                            Message::toPayload
+                    )
+            );
         } else {
             return ResponseEntity.badRequest().build();
         }

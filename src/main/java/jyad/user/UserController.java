@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Controller
 @CrossOrigin(origins = "*")
@@ -24,7 +25,6 @@ public class UserController {
 
     @Autowired
     UserValidator userValidator;
-
 
     @Autowired
     UserAuthService userAuthService;
@@ -119,14 +119,25 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("user/{userId}/discussions/get")
-    public ResponseEntity<?> getUserDiscussions(@PathVariable Long userId) {
-        List<Discussion> userDiscussions = userService.getUserDiscussions(userId);
+    @GetMapping("user/discussions/get")
+    public ResponseEntity<?> getUserDiscussions(@RequestHeader("USER_AUTH_TOKEN") String authToken) {
+
+        List<Discussion> userDiscussions = userService.getUserDiscussions(authToken);
         if (Objects.nonNull(userDiscussions)) {
             return ResponseEntity.ok(userDiscussions);
         } else {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("user/search")
+    public ResponseEntity<?> searchUser(@RequestParam("q") String searchQuery) {
+        Set<User> users = userService.searchUsers(searchQuery);
+        if (users == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(users);
     }
 
 
