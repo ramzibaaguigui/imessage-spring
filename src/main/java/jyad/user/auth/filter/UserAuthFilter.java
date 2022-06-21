@@ -5,6 +5,12 @@ import jyad.user.auth.UserAuthService;
 import jyad.user.auth.utility.AuthHeaderManipulator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -13,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.Principal;
 
 @Component
 @Order(1)
@@ -28,7 +35,6 @@ public class UserAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-
         if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
              return;
@@ -36,6 +42,7 @@ public class UserAuthFilter extends OncePerRequestFilter {
 
         String token = headerManipulator.extractAuthToken(request);
         User authUser = userAuthService.validateAuthentication(token);
+
         System.out.println(token);
 
         if (authUser == null) {

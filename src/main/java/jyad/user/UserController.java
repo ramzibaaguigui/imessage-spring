@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@Controller
+@RestController
 @CrossOrigin(origins = "*")
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -120,7 +121,9 @@ public class UserController {
     }
 
     @GetMapping("user/discussions/get")
-    public ResponseEntity<?> getUserDiscussions(@RequestHeader("USER_AUTH_TOKEN") String authToken) {
+    public ResponseEntity<?> getUserDiscussions(@RequestHeader("USER_AUTH_TOKEN") String authToken, Authentication auth) {
+
+        System.out.println("authentication: " + auth);
 
         List<Discussion> userDiscussions = userService.getUserDiscussions(authToken);
         if (Objects.nonNull(userDiscussions)) {

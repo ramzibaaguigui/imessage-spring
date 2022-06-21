@@ -65,12 +65,7 @@ public class User {
     private String password;
 
 
-    @ManyToMany
-    @JoinTable(
-            name = "users_discussions",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "discussion_id")
-    )
+    @ManyToMany(mappedBy = "users", targetEntity = Discussion.class)
     @JsonIgnore
     private List<Discussion> discussions;
 
@@ -135,5 +130,9 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, userName);
+    }
+
+    public void addDiscussion(Discussion discussion) {
+        this.discussions.add(discussion);
     }
 }

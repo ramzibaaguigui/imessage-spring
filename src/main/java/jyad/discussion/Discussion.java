@@ -25,7 +25,10 @@ public class Discussion {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany(mappedBy = "discussions")
+    @ManyToMany
+    @JoinTable(name = "users_discussions",
+    joinColumns = @JoinColumn(name = "discussion_id"),
+    inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonIgnore
     private Set<User> users = new HashSet<>();
 

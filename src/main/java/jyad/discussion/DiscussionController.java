@@ -23,11 +23,12 @@ public class DiscussionController {
                                               @RequestHeader(Headers.USER_AUTH_TOKEN) String authToken) {
 
         Discussion createdDiscussion = discussionService.createDiscussion(authToken, createDiscussionRequestPayload);
-
         if (createdDiscussion == null) {
             return ResponseEntity.badRequest().build();
         }
 
+        System.out.println("create discussion");
+        System.out.println(createdDiscussion.getUsers());
         return ResponseEntity.ok(createdDiscussion);
     }
 
@@ -42,9 +43,11 @@ public class DiscussionController {
         discussionService.deleteDiscussion(id);
     }
 
-    @GetMapping("/discussion/{discussionId}/users/")
+    @GetMapping("/discussion/{discussionId}/users")
     public ResponseEntity<?> getDiscussionUsers(@PathVariable Long discussionId) {
         Set<User> discussionUsers = discussionService.getDiscussionUsers(discussionId);
+        System.out.println("discussions: " + discussionUsers);
+
         if (Objects.nonNull(discussionUsers)) {
             return ResponseEntity.ok(discussionUsers);
         }
