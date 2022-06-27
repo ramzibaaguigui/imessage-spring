@@ -8,11 +8,11 @@
     <version>2.5.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>jyad</groupId>
-  <artifactId>tailwind-spring-boot</artifactId>
+  <groupId>ramzanlabs</groupId>
+  <artifactId>imessage-spring-boot</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>tailwind-spring-boot</name>
-  <description>tailwind-spring-boot</description>
+  <description>imessage-spring-boot</description>
   <properties>
     <java.version>17</java.version>
   </properties>
