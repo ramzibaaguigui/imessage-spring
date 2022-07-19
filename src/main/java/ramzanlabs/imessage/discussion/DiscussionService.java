@@ -98,7 +98,7 @@ public class DiscussionService {
 
     public Discussion createDiscussion(String authToken, CreateDiscussionRequestPayload createDiscussionRequestPayload) {
         List<User> users = userRepository.getUsersByUserNameIn(createDiscussionRequestPayload.getDiscussionUsersUsernames());
-        User createdBy = userAuthService.validateAuthentication(authToken);
+        User createdBy = userAuthService.validateUserAuthentication(authToken);
         if (createdBy == null) {
             return null;
         }
@@ -121,7 +121,7 @@ public class DiscussionService {
 
     public boolean deleteDiscussion(String authToken, Long discussionId) {
         Optional<Discussion> discussion = discussionRepository.findById(discussionId);
-        User user = userAuthService.validateAuthentication(authToken);
+        User user = userAuthService.validateUserAuthentication(authToken);
         if (discussion.isEmpty() || user == null) {
             return false;
         }

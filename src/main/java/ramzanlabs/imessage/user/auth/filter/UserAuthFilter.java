@@ -1,12 +1,15 @@
 package ramzanlabs.imessage.user.auth.filter;
 
-import ramzanlabs.imessage.user.auth.utility.AuthHeaderManipulator;
-import ramzanlabs.imessage.user.User;
-import ramzanlabs.imessage.user.auth.UserAuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ramzanlabs.imessage.user.auth.UserAuthService;
+import ramzanlabs.imessage.user.auth.utility.AuthHeaderManipulator;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,24 +28,26 @@ public class UserAuthFilter extends OncePerRequestFilter {
     @Autowired
     AuthHeaderManipulator headerManipulator;
 
+    private Logger logger = LoggerFactory.getLogger(UserAuthFilter.class);
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
-             return;
+            return;
         }
 
         String token = headerManipulator.extractAuthToken(request);
-        User authUser = userAuthService.validateAuthentication(token);
 
-        System.out.println("auth token " + token);
-
-        if (authUser == null) {
+        Authentication authentication = userAuthService.validateAuthentication(token);
+        logger.info("user auth token: {}", token);
+        if (authentication == null) {
             unauthorizeResponse(response);
             return;
         }
 
+        // setUserAuth(authentication);
         filterChain.doFilter(request, response);
     }
 
@@ -68,5 +73,7 @@ public class UserAuthFilter extends OncePerRequestFilter {
         response.getWriter().write("UNAUTHORIZED");
     }
 
-
+    private void setUserAuth(Authentication authentication) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 }

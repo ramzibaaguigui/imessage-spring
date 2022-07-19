@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
+import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 @Setter
 @Table(name = "users")
 @Indexed
-public class User {
+public class User implements Principal {
 
 
     @Column(name = "first_name")
@@ -130,6 +131,11 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, userName);
+    }
+
+    @Override
+    public String getName() {
+        return userName;
     }
 
     public void addDiscussion(Discussion discussion) {

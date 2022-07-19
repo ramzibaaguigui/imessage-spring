@@ -2,11 +2,16 @@ package ramzanlabs.imessage.user.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import ramzanlabs.imessage.user.User;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +21,7 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "user_auth")
-public class UserAuth {
+public class UserAuth implements Authentication {
 
 
     private UserAuth(User user, String token, Instant issuedAt, Instant expireAt) {
@@ -58,6 +63,63 @@ public class UserAuth {
 
     static UserAuth forUser(User user, String authToken, Instant issuedAt, Instant expireAt) {
         return new UserAuth(user, authToken, issuedAt, expireAt);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        for (Role role: authUser.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+        }
+        return authorities;
+    }
+
+    @Override
+    public Object getCredentials() {
+        return new UserCredentials(authUser.getUserName(), authUser.getPassword());
+    }
+
+    @Override
+    public Object getDetails() {
+        return new UserDetails(authUser.getFirstName(), authUser.getLastName());
+    }
+
+    @Override
+    public Object getPrincipal() {
+        return authUser;
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
+    @Override
+    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+    }
+
+    @Override
+    public String getName() {
+        return authToken;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class UserCredentials {
+        private String username;
+        private String password;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class UserDetails {
+        private String firstName;
+        private String lastName;
     }
 
 }

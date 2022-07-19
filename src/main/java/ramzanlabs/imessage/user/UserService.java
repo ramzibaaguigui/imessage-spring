@@ -94,7 +94,7 @@ public class UserService {
     }
 
     public List<Discussion> getUserDiscussions(String authToken) {
-        User user = userAuthService.validateAuthentication(authToken);
+        User user = userAuthService.validateUserAuthentication(authToken);
         System.out.println(user);
         if (user == null) {
             return null;

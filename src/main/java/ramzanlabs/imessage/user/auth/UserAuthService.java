@@ -1,5 +1,6 @@
 package ramzanlabs.imessage.user.auth;
 
+import org.springframework.security.core.Authentication;
 import ramzanlabs.imessage.user.UserService;
 import ramzanlabs.imessage.user.auth.config.TokenDuration;
 import ramzanlabs.imessage.user.auth.payload.UserAuthRequestPayload;
@@ -9,6 +10,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -54,7 +56,7 @@ public class UserAuthService {
     }
 
     //TODO: consider fixing this, it returns null even if the token is valid
-    public User validateAuthentication(String token) {
+    public User validateUserAuthentication(String token) {
         if (token == null){
             return null;
         }
@@ -67,6 +69,22 @@ public class UserAuthService {
         }
         return null;
     }
+
+    public Authentication validateAuthentication(String authToken) {
+        if (authToken == null) {
+            return null;
+        }
+        Optional<UserAuth> userAuth = userAuthRepository.findFirstByAuthTokenEquals(authToken);
+
+        if (userAuth.isPresent()) {
+            if (authIsValid(userAuth.get())) {
+                return userAuth.get();
+            }
+        }
+        return null;
+    }
+
+
 
     private UserAuth generateAuthForUser(User user) {
         Instant issuedAt = Instant.now();

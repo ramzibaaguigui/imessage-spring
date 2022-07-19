@@ -116,19 +116,33 @@
       <version>5.6.2</version>
     </dependency>
 
+<<<<<<< HEAD
     <!-- https://mvnrepository.com/artifact/org.springframework/spring-websocket -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-websocket</artifactId>
       <version>5.3.21</version>
+=======
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+      <version>2.7.1</version>
+>>>>>>> 05a75ce (Added principal assignment on each thread SecurityContextHolder)
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.springframework/spring-messaging -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-messaging</artifactId>
+<<<<<<< HEAD
       <version>5.3.21</version>
     </dependency>
+=======
+      <version>5.3.22</version>
+    </dependency>
+
+>>>>>>> 05a75ce (Added principal assignment on each thread SecurityContextHolder)
 
 
   </dependencies>
