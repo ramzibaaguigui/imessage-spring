@@ -15,6 +15,7 @@ public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
     Optional<UserAuth> findFirstByAuthTokenEqualsAndIssuedAtEquals(String token, Instant issuedAt);
 
+    @Transactional
     Optional<UserAuth> findFirstByAuthTokenEquals(String token);
 
     @Transactional

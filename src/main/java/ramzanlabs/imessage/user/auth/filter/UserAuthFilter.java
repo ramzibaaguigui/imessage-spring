@@ -41,13 +41,16 @@ public class UserAuthFilter extends OncePerRequestFilter {
         String token = headerManipulator.extractAuthToken(request);
 
         Authentication authentication = userAuthService.validateAuthentication(token);
+        System.out.println("Authenticationaaa" + authentication);
         logger.info("user auth token: {}", token);
         if (authentication == null) {
             unauthorizeResponse(response);
+            logger.info("authentication invalid");
             return;
-        }
 
-        // setUserAuth(authentication);
+        }
+        logger.info("authentication valid");
+        setUserAuth(authentication);
         filterChain.doFilter(request, response);
     }
 

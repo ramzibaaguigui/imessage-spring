@@ -29,7 +29,7 @@ public class Discussion {
     @JoinTable(name = "users_discussions",
     joinColumns = @JoinColumn(name = "discussion_id"),
     inverseJoinColumns = @JoinColumn(name = "user_id"))
-//    @JsonIgnore
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 
     @Column(name = "discussion_name")

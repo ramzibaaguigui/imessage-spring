@@ -13,7 +13,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
+// @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -65,6 +65,7 @@ public class UserAuth implements Authentication {
         return new UserAuth(user, authToken, issuedAt, expireAt);
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -75,21 +76,25 @@ public class UserAuth implements Authentication {
     }
 
     @Override
+    @JsonIgnore
     public Object getCredentials() {
         return new UserCredentials(authUser.getUserName(), authUser.getPassword());
     }
 
+    @JsonIgnore
     @Override
     public Object getDetails() {
         return new UserDetails(authUser.getFirstName(), authUser.getLastName());
     }
 
     @Override
+    @JsonIgnore
     public Object getPrincipal() {
         return authUser;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAuthenticated() {
         return true;
     }

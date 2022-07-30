@@ -3,16 +3,17 @@ package ramzanlabs.imessage.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ramzanlabs.imessage.discussion.Discussion;
-import ramzanlabs.imessage.user.auth.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Indexed;
+import ramzanlabs.imessage.discussion.Discussion;
+import ramzanlabs.imessage.user.auth.Role;
 
 import javax.persistence.*;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -66,9 +67,11 @@ public class User implements Principal {
     private String password;
 
 
-    @ManyToMany(mappedBy = "users", targetEntity = Discussion.class)
+    @ManyToMany(mappedBy = "users",
+            targetEntity = Discussion.class,
+            fetch = FetchType.EAGER)
     @JsonIgnore
-    private List<Discussion> discussions;
+    private List<Discussion> discussions = new ArrayList<>();
 
     @JsonIgnore
     @ManyToMany

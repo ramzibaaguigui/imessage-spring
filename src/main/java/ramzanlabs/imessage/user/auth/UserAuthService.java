@@ -71,16 +71,23 @@ public class UserAuthService {
     }
 
     public Authentication validateAuthentication(String authToken) {
+        System.out.println("validating authentication for " + authToken);
         if (authToken == null) {
+            System.out.println("auth token is null");
             return null;
+
         }
+        System.out.println("auth token is not null");
+        System.out.println();
         Optional<UserAuth> userAuth = userAuthRepository.findFirstByAuthTokenEquals(authToken);
 
         if (userAuth.isPresent()) {
+            System.out.println("authentication is present in database");
             if (authIsValid(userAuth.get())) {
                 return userAuth.get();
             }
         }
+        System.out.println("authentication not found in database");
         return null;
     }
 

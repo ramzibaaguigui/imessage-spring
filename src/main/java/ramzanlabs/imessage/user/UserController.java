@@ -1,9 +1,5 @@
 package ramzanlabs.imessage.user;
 
-import ramzanlabs.imessage.discussion.Discussion;
-import ramzanlabs.imessage.headers.Headers;
-import ramzanlabs.imessage.user.auth.UserAuthService;
-import ramzanlabs.imessage.user.utils.UserValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ramzanlabs.imessage.discussion.Discussion;
+import ramzanlabs.imessage.headers.Headers;
+import ramzanlabs.imessage.user.auth.UserAuthService;
+import ramzanlabs.imessage.user.utils.UserValidator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -121,11 +122,11 @@ public class UserController {
     }
 
     @GetMapping("user/discussions/get")
-    public ResponseEntity<?> getUserDiscussions(@RequestHeader(Headers.USER_AUTH_TOKEN) String authToken, Authentication auth) {
+    public ResponseEntity<?> getUserDiscussions(
+            @RequestHeader(Headers.USER_AUTH_TOKEN) String authToken,
+            Authentication auth) {
 
-        System.out.println("authentication: " + auth);
-
-        List<Discussion> userDiscussions = userService.getUserDiscussions(authToken);
+        List<Discussion> userDiscussions = userService.getUserDiscussions(auth);
         if (Objects.nonNull(userDiscussions)) {
             return ResponseEntity.ok(userDiscussions);
         } else {

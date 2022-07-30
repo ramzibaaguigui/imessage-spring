@@ -1,5 +1,6 @@
 package ramzanlabs.imessage.user;
 
+import org.springframework.security.core.Authentication;
 import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.discussion.DiscussionRepository;
 import ramzanlabs.imessage.user.auth.UserAuthService;
@@ -92,7 +93,6 @@ public class UserService {
         Optional<User> user = userRepository.getUserById(userId);
         return user.map(User::getDiscussions).orElse(null);
     }
-
     public List<Discussion> getUserDiscussions(String authToken) {
         User user = userAuthService.validateUserAuthentication(authToken);
         System.out.println(user);
@@ -100,6 +100,14 @@ public class UserService {
             return null;
         }
 
+        return user.getDiscussions();
+    }
+
+    public List<Discussion> getUserDiscussions(Authentication authentication) {
+        User user = ((User) authentication.getPrincipal());
+        if (user == null) {
+            return null;
+        }
         return user.getDiscussions();
     }
 
