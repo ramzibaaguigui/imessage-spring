@@ -9,7 +9,9 @@ import ramzanlabs.imessage.user.User;
 import ramzanlabs.imessage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ramzanlabs.imessage.websocket.payload.SendMessagePayload;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -85,6 +87,36 @@ public class MessageService {
         }
 
         return null;
+    }
+
+    public Message sendMessage(User sender, SendMessagePayload sendMessagePayload) {
+        Discussion discussion = discussionRepository.getDiscussionById(sendMessagePayload.getDiscussionId()).get();
+        if (userCanSendInDiscussion(sender, discussion)) {
+            var message = createMessage(sender, discussion, sendMessagePayload.getContent());
+            discussion.addMessage(message);
+            discussionRepository.save(discussion);
+            return message;
+        }
+        return null;
+    }
+
+    private boolean userCanSendInDiscussion(User sender, Discussion discussion) {
+        if (sender == null || discussion == null) {
+            return false;
+        }
+
+        return discussion.hasUser(sender);
+    }
+
+    private Message createMessage(User sender, Discussion discussion, String content) {
+        Message message = new Message();
+        message.setContent(content);
+        message.setSender(sender);
+        message.setDiscussion(discussion);
+        Date now = Date.from(Instant.now());
+        message.setSentAt(now);
+        message.setUpdatedAt(now);
+        return message;
     }
 
 }

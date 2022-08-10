@@ -12,6 +12,7 @@ import ramzanlabs.imessage.headers.Headers;
 import ramzanlabs.imessage.user.auth.UserAuthService;
 import ramzanlabs.imessage.user.utils.UserValidator;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -142,6 +143,19 @@ public class UserController {
         }
 
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("users/all")
+    public ResponseEntity<?> getAllUsers(Principal principal) {
+        System.out.println("returning all users");
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("users/contacts")
+    public ResponseEntity<?> getContacts(Principal principal) {
+        User user = (User) principal;
+        return ResponseEntity.ok(userService.
+                getAllContacts(user));
     }
 
 }

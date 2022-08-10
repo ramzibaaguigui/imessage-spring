@@ -2,6 +2,7 @@ package ramzanlabs.imessage.discussion;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.Fetch;
 import ramzanlabs.imessage.message.Message;
 import ramzanlabs.imessage.user.User;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class Discussion {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_discussions",
     joinColumns = @JoinColumn(name = "discussion_id"),
     inverseJoinColumns = @JoinColumn(name = "user_id"))
@@ -48,9 +49,18 @@ public class Discussion {
     private Date createdAt;
 
 
-    public void addUser(User user) {
-        if (!userExists(user))
-            this.users.add(user);
+    public void addUsers(User... users) {
+        for (User user: users) {
+            if (!userExists(user))
+                this.users.add(user);
+        }
+    }
+
+    public void addMessage(Message message) {
+        if (message == null) {
+            return;
+        }
+        messages.add(message);
     }
 
     private boolean userExists(User user) {
@@ -60,6 +70,25 @@ public class Discussion {
             }
         }
         return false;
+    }
+
+    public boolean hasUser(User user) {
+        return this.users.contains(user);
+    }
+
+    public boolean hasExactUsers(User... users) {
+        return this.users.containsAll(Arrays.stream(users).toList())
+                && this.users.size() == users.length;
+    }
+
+    // @JsonProperty("new_discussion")
+    public boolean discussionIsNew() {
+        return this.messages.size() == 0;
+    }
+
+    @JsonProperty("members_count")
+    public int membersCount() {
+        return users.size();
     }
 
 }

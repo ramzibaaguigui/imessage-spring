@@ -1,13 +1,20 @@
 package ramzanlabs.imessage.discussion;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ramzanlabs.imessage.discussion.payload.CreateDiscussionRequestPayload;
+import ramzanlabs.imessage.discussion.payload.DiscussionInquiryRequestPayload;
+import ramzanlabs.imessage.discussion.payload.DiscussionInquiryResponsePayload;
 import ramzanlabs.imessage.headers.Headers;
 import ramzanlabs.imessage.user.User;
+import ramzanlabs.imessage.user.UserService;
+import ramzanlabs.imessage.user.auth.UserAuth;
 
+import java.security.Principal;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,11 +24,15 @@ public class DiscussionController {
     @Autowired
     DiscussionService discussionService;
 
+    @Autowired
+    UserService userService;
+
     @PostMapping("/discussion/create")
     public ResponseEntity<?> createDiscussion(@RequestBody CreateDiscussionRequestPayload createDiscussionRequestPayload,
-                                              @RequestHeader(Headers.USER_AUTH_TOKEN) String authToken) {
-
-        Discussion createdDiscussion = discussionService.createDiscussion(authToken, createDiscussionRequestPayload);
+                                              @RequestHeader(Headers.USER_AUTH_TOKEN) String authToken,
+                                              Authentication authentication) {
+        User createdBy = ((UserAuth) authentication).getAuthUser();
+        Discussion createdDiscussion = discussionService.createDiscussion(createdBy, createDiscussionRequestPayload);
         if (createdDiscussion == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -56,6 +67,21 @@ public class DiscussionController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/discussion/inquiry")
+    public ResponseEntity<?> inquiryDiscussion(Authentication authentication,
+                                               @RequestParam("user_id") Long userId) {
+        User contact = userService.getUserById(userId);
+        System.out.println(contact);
+        System.out.println(userId);
+        if (contact == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User currentUser = ((UserAuth) authentication).getAuthUser();
+        Discussion discussion = discussionService.getDiscussionByUsers(currentUser, contact);
+        return ResponseEntity.ok(DiscussionInquiryResponsePayload.create(discussion));
     }
 
 

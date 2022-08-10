@@ -60,7 +60,7 @@ public class UserService {
         Optional<Discussion> discussion = discussionRepository.getDiscussionById(discussionId);
         Optional<User> user = userRepository.getUserById(userId);
         if (discussion.isPresent() && user.isPresent()) {
-            discussion.get().addUser(user.get());
+            discussion.get().addUsers(user.get());
             discussionRepository.save(discussion.get());
             return true;
         }
@@ -132,10 +132,7 @@ public class UserService {
                 .stream()
                 .filter(user -> (user.getUserName().equals(username) && passwordEncoder.matches(password, user.getPassword())))
                 .findAny();
-        if (authUser.isPresent()) {
-            return authUser.get();
-        }
-        return null;
+        return authUser.orElse(null);
     }
 
     public Set<User> searchUsers(String searchQuery) {
@@ -153,4 +150,15 @@ public class UserService {
                 .collect(Collectors.toSet());
         return users;
     }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Set<User> getAllContacts(User user) {
+        return user.getDiscussions().stream().filter(discussion -> discussion.hasUser(user))
+                .flatMap(discussion -> discussion.getUsers().stream())
+                .collect(Collectors.toSet());
+    }
+
 }

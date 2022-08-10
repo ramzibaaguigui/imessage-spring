@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.Optional;
 
 @Repository
-public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
+public interface  UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
 
     Optional<UserAuth> findFirstByAuthTokenEqualsAndIssuedAtEquals(String token, Instant issuedAt);

@@ -27,8 +27,6 @@ public class AuthHeaderManipulator {
         System.out.println("auth token issued token header " + response.getHeaders().get(AUTH_TOKEN_ISSUED_AT_HEADER_KEY));
     }
 
-
-
     public String extractAuthToken(HttpServletRequest request) {
         return request.getHeader(AUTH_TOKEN_HEADER_KEY);
     }

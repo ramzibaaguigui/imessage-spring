@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ramzanlabs.imessage.user.auth.UserAuthService;
+import ramzanlabs.imessage.user.auth.UserAuthenticationPool;
 import ramzanlabs.imessage.user.auth.utility.AuthHeaderManipulator;
 
 import javax.servlet.FilterChain;
@@ -16,17 +17,24 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Iterator;
 
 @Component
 @Order(1)
 public class UserAuthFilter extends OncePerRequestFilter {
 
+    private final UserAuthService userAuthService;
+    private final AuthHeaderManipulator authHeaderManipulator;
+    private final UserAuthenticationPool userAuthenticationPool;
 
     @Autowired
-    UserAuthService userAuthService;
-
-    @Autowired
-    AuthHeaderManipulator headerManipulator;
+    public UserAuthFilter(UserAuthService userAuthService,
+                          AuthHeaderManipulator authHeaderManipulator,
+                          UserAuthenticationPool userAuthenticationPool) {
+        this.userAuthService = userAuthService;
+        this.authHeaderManipulator = authHeaderManipulator;
+        this.userAuthenticationPool = userAuthenticationPool;
+    }
 
     private Logger logger = LoggerFactory.getLogger(UserAuthFilter.class);
 
@@ -37,27 +45,43 @@ public class UserAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        System.out.println("the header names");
+        Iterator<String> iterator = request.getHeaderNames().asIterator();
+        while (iterator.hasNext()) {
+            String next = iterator.next();
+            System.out.println(next);
+        }
 
-        String token = headerManipulator.extractAuthToken(request);
+        String token = authHeaderManipulator.extractAuthToken(request);
+        Authentication auth = userAuthenticationPool.validateAuthentication(token);
+        if (auth == null) {
+            auth = userAuthService.validateAuthentication(token);
+        }
 
-        Authentication authentication = userAuthService.validateAuthentication(token);
-        System.out.println("Authenticationaaa" + authentication);
-        logger.info("user auth token: {}", token);
-        if (authentication == null) {
+        if (auth == null) {
             unauthorizeResponse(response);
             logger.info("authentication invalid");
             return;
 
         }
         logger.info("authentication valid");
-        setUserAuth(authentication);
+        userAuthenticationPool.storeAuthentication(auth);
+        setUserAuth(auth);
         filterChain.doFilter(request, response);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return requestsAuthentication(request)
-                || requestsRegistration(request);
+                || requestsRegistration(request)
+                || connectsToWebsocket(request);
+    }
+    // this is to be removed later
+    private boolean connectsToWebsocket(HttpServletRequest request) {
+        System.out.println(request.getServletPath());
+        boolean value = request.getServletPath().equals("/ws");
+        System.out.println("requests message mapping" + value);
+        return value;
     }
 
     private boolean requestsAuthentication(HttpServletRequest request) {

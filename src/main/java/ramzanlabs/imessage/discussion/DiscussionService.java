@@ -10,6 +10,7 @@ import ramzanlabs.imessage.user.auth.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -72,7 +73,7 @@ public class DiscussionService {
         Optional<User> user = userRepository.getUserById(userId);
 
         if (discussion.isPresent() && user.isPresent()) {
-            discussion.get().addUser(user.get());
+            discussion.get().addUsers(user.get());
             Discussion savedDiscussion = discussionRepository.save(discussion.get());
         }
     }
@@ -85,7 +86,7 @@ public class DiscussionService {
 
             Discussion discussion = new Discussion();
             for (User user : users) {
-                discussion.addUser(user);
+                discussion.addUsers(user);
             }
             discussion.setName(discussionCreationRequest.getName());
             discussion.setCreatedBy(createdBy.get());
@@ -96,17 +97,16 @@ public class DiscussionService {
         }
     }
 
-    public Discussion createDiscussion(String authToken, CreateDiscussionRequestPayload createDiscussionRequestPayload) {
+    public Discussion createDiscussion(User createdBy, CreateDiscussionRequestPayload createDiscussionRequestPayload) {
         List<User> users = userRepository.getUsersByUserNameIn(createDiscussionRequestPayload.getDiscussionUsersUsernames());
-        User createdBy = userAuthService.validateUserAuthentication(authToken);
         if (createdBy == null) {
             return null;
         }
 
         Discussion discussion = new Discussion();
-        discussion.addUser(createdBy);
+        discussion.addUsers(createdBy);
         for (User user: users) {
-            discussion.addUser(user);
+            discussion.addUsers(user);
         }
         discussion.setName(createDiscussionRequestPayload.getDiscussionName());
         discussion.setCreatedBy(createdBy);
@@ -114,6 +114,14 @@ public class DiscussionService {
         return discussionRepository.save(discussion);
     }
 
+    public Discussion createDiscussion(User createdBy, User other) {
+        Date now = time.now();
+        Discussion discussion = new Discussion();
+        discussion.setCreatedAt(now);
+        discussion.setCreatedBy(createdBy);
+        discussion.addUsers(createdBy, other);
+        return discussionRepository.save(discussion);
+    }
     public void removeDiscussion(String discussionId) {
         discussionRepository.deleteDiscussionById(discussionId);
     }
@@ -137,5 +145,15 @@ public class DiscussionService {
     public Set<User> getDiscussionUsers(Long discussionId) {
         Optional<Discussion> discussion = discussionRepository.getDiscussionById(discussionId);
         return discussion.map(Discussion::getUsers).orElse(null);
+    }
+
+    public Discussion getDiscussionByUsers(User currentUser, User other) {
+        Discussion searchedDiscussion = discussionRepository.findAll().stream()
+                .filter(discussion -> discussion.hasExactUsers(currentUser, other))
+                .findFirst().orElse(null);
+        if (searchedDiscussion == null) {
+            searchedDiscussion = createDiscussion(currentUser, other);
+        }
+        return searchedDiscussion;
     }
 }

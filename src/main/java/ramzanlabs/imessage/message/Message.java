@@ -2,6 +2,7 @@ package ramzanlabs.imessage.message;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.message.payload.MessagePayload;
 import ramzanlabs.imessage.user.User;
@@ -22,18 +23,23 @@ public class Message {
     @Id
     @Column(name = "message_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonProperty("message_id")
     private Long id;
 
     @Column(name = "message_content")
+    @JsonProperty("message_content")
     private String content;
 
     @Column(name = "sent_at")
+    @JsonProperty("sent_at")
     private Date sentAt;
 
     @Column(name = "updated_at")
+    @JsonProperty("updated_at")
     private Date updatedAt;
 
     @Column(name = "is_deleted")
+    @JsonIgnore
     private Boolean isDeleted = false;
 
     @ManyToOne
@@ -46,6 +52,16 @@ public class Message {
     @JsonIgnore
     private Discussion discussion;
 
+    @JsonProperty("sender_id")
+    public Long getSenderId() {
+        return this.sender.getId();
+    }
+
+    @JsonProperty("discussion_id")
+    public Long getDiscussionId() {
+        return this.discussion.getId();
+    }
+
     public MessagePayload toPayload() {
         return MessagePayload.create()
                 .withId(getId())
@@ -54,4 +70,6 @@ public class Message {
                 .updatedAt(getUpdatedAt())
                 .senderUsername(getSender().getUserName());
     }
+
+
 }

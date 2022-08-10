@@ -1,6 +1,8 @@
 package ramzanlabs.imessage.user.auth;
 
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 import ramzanlabs.imessage.user.UserService;
 import ramzanlabs.imessage.user.auth.config.TokenDuration;
 import ramzanlabs.imessage.user.auth.payload.UserAuthRequestPayload;
@@ -10,7 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public class UserAuthService {
     private static final long EVERY_MINUTE = 60 * 1000;
 
     @Autowired
-    UserAuthRepository userAuthRepository;
+    private UserAuthRepository userAuthRepository;
 
     @Autowired
     UserService userService;

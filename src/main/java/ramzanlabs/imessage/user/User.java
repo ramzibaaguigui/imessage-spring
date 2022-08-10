@@ -37,7 +37,7 @@ public class User implements Principal {
     @Id
     @Column(name = "user_id", unique = true)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonIgnore
+    @JsonProperty("user_id")
     private Long id;
 
     @Column(name = "last_name")
@@ -74,7 +74,7 @@ public class User implements Principal {
     private List<Discussion> discussions = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
