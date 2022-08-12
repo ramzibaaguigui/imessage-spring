@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 @Component
-@Order(1)
+//@Order(1)
 public class UserAuthFilter extends OncePerRequestFilter {
 
     private final UserAuthService userAuthService;
