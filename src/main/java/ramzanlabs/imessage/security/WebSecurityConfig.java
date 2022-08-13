@@ -39,6 +39,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(userAuthFilter, BasicAuthenticationFilter.class);
         http.authorizeRequests()
+                .antMatchers("/authenticate")
+                .permitAll()
                 .and().authorizeRequests()
                 .anyRequest().authenticated()
                 .and().cors()
