@@ -20,9 +20,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
      */
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        System.out.println("before handshake is called");
-        System.out.println("the headers of the incoming request");
-        System.out.println(request.getHeaders());
         return true;
     }
 

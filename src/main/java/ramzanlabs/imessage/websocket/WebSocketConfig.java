@@ -9,6 +9,7 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.config.annotation.*;
 import ramzanlabs.imessage.user.auth.UserAuthService;
@@ -67,14 +68,21 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
-/*
-                StompHeaderAccessor accessor = (StompHeaderAccessor) StompHeaderAccessor.getAccessor(message);
-                System.out.println("the stomp command is");
-                System.out.println(accessor.getCommand());
-                System.out.println(accessor.toNativeHeaderMap());
+                Object payload = message.getPayload();
+                System.out.println("this is the real payload");
+                System.out.println(payload);
+                GenericMessage<Object> genericMessage = (GenericMessage<Object>) message;
+                StompHeaderAccessor accessor = (StompHeaderAccessor) StompHeaderAccessor.getAccessor(genericMessage);
+                System.out.println("payload: " + genericMessage.getPayload());
+                System.out.println("headers: " + genericMessage.getHeaders());
 
-                System.out.println(message.getHeaders());
-                return message;*/
+                System.out.println("desires to send the message: " + message);
+                System.out.println("the auth header is:");
+                System.out.println(accessor.getMessageHeaders().get("USER_AUTH_TOKEN"));
+                if (true) {
+                    return message;
+                }
+                System.out.println("desires to send the message: " + message.toString());
                 String authToken = extractMessageAuthTokenHeader(message);
                 if (authToken == null) {
                     System.out.println("the auth token is null");
@@ -106,7 +114,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
 
     private String extractMessageAuthTokenHeader(Message<?> message) {
         StompHeaderAccessor accessor = (StompHeaderAccessor) StompHeaderAccessor.getAccessor(message);
-        return accessor.getFirstNativeHeader(USER_AUTH_TOKEN);
+        accessor.getMessage();
+        System.out.println(accessor.getCommand());
+        System.out.println("contains key: " + accessor.getMessageHeaders().containsKey(USER_AUTH_TOKEN));
+        System.out.println(accessor.getMessageHeaders().get(USER_AUTH_TOKEN));
+        return accessor.getNativeHeader(USER_AUTH_TOKEN).get(0);
+//        return (String) accessor.getMessageHeaders().get(USER_AUTH_TOKEN);
 
     }
 

@@ -23,7 +23,7 @@ public class UserAuthHandshakeHandler extends DefaultHandshakeHandler {
     protected Principal determineUser(ServerHttpRequest request,
                                       WebSocketHandler wsHandler,
                                       Map<String, Object> attributes) {
-
+        System.out.println("these are the headers: " + request.getHeaders() );
         System.out.println(attributes);
         System.out.println("determine user is called");
         String authToken = extractAuthToken(request);

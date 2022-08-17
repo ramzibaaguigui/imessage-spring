@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 @Component
-//@Order(1)
 public class UserAuthFilter extends OncePerRequestFilter {
 
     private final UserAuthService userAuthService;
@@ -44,12 +43,6 @@ public class UserAuthFilter extends OncePerRequestFilter {
         if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
-        }
-        System.out.println("the header names");
-        Iterator<String> iterator = request.getHeaderNames().asIterator();
-        while (iterator.hasNext()) {
-            String next = iterator.next();
-            System.out.println(next);
         }
 
         String token = authHeaderManipulator.extractAuthToken(request);
