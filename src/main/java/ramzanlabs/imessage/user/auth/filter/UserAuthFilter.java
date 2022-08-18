@@ -3,13 +3,12 @@ package ramzanlabs.imessage.user.auth.filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ramzanlabs.imessage.user.auth.UserAuthService;
-import ramzanlabs.imessage.user.auth.UserAuthenticationPool;
+import ramzanlabs.imessage.user.auth.UserAuthPool;
 import ramzanlabs.imessage.user.auth.utility.AuthHeaderManipulator;
 
 import javax.servlet.FilterChain;
@@ -17,19 +16,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Iterator;
 
 @Component
 public class UserAuthFilter extends OncePerRequestFilter {
 
     private final UserAuthService userAuthService;
     private final AuthHeaderManipulator authHeaderManipulator;
-    private final UserAuthenticationPool userAuthenticationPool;
+    private final UserAuthPool userAuthenticationPool;
 
     @Autowired
     public UserAuthFilter(UserAuthService userAuthService,
                           AuthHeaderManipulator authHeaderManipulator,
-                          UserAuthenticationPool userAuthenticationPool) {
+                          UserAuthPool userAuthenticationPool) {
         this.userAuthService = userAuthService;
         this.authHeaderManipulator = authHeaderManipulator;
         this.userAuthenticationPool = userAuthenticationPool;

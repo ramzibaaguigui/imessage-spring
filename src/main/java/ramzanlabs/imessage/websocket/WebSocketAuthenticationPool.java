@@ -9,17 +9,21 @@ import java.util.HashMap;
 public class WebSocketAuthenticationPool {
     private HashMap<String, Authentication> authPool = new HashMap<>();
 
-    public Authentication validateAuthentication(String authToken) {
-        return authPool.get(authToken);
+    public Authentication validateAuthentication(String simpSessionId) {
+        if (simpSessionId == null) {
+            return null;
+        }
+        return authPool.get(simpSessionId);
     }
 
-    public boolean storeAuthentication(Authentication auth) {
-        if (auth == null) {
+    public boolean storeAuthentication(String simpSessionId, Authentication authentication) {
+        if (simpSessionId == null || authentication == null) {
             return false;
         }
-        authPool.put(auth.getName(), auth);
+        this.authPool.put(simpSessionId, authentication);
         return true;
     }
+
 
 
 }

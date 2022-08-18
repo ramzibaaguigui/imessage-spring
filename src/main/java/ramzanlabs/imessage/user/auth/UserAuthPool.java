@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 
 @Component
-public class UserAuthenticationPool {
+public class UserAuthPool {
     private HashMap<String, Authentication> authPool = new HashMap<>();
 
     public Authentication validateAuthentication(String authToken) {
