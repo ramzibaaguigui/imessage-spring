@@ -1,8 +1,9 @@
-package ramzanlabs.imessage.websocket;
+package ramzanlabs.imessage.websocket.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
@@ -11,6 +12,8 @@ import ramzanlabs.imessage.user.auth.UserAuthService;
 
 import javax.servlet.ServletContext;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,26 +26,17 @@ public class UserAuthHandshakeHandler extends DefaultHandshakeHandler {
     protected Principal determineUser(ServerHttpRequest request,
                                       WebSocketHandler wsHandler,
                                       Map<String, Object> attributes) {
-        System.out.println("these are the headers: " + request.getHeaders() );
-        System.out.println(attributes);
+        // todo: consider finding a way to bridge the sec-websocket-key to the auth header provided by the user
+
         System.out.println("determine user is called");
-        String authToken = extractAuthToken(request);
-        System.out.println("the extracted auth token header is");
-        System.out.println(authToken);
-        System.out.println(request.getPrincipal());
-        Authentication auth = userAuthService.validateAuthentication(authToken);
-        if (auth == null) {
-            return null;
-        }
-        ;
-
-        return auth;
-        // todo: consider adding the auth with the first frame received from the user
-        // the websocket is going to be open for everyone to connect
-        // but right after the connection is made
-        // there should be a sent frame containing the auth information
-        // if the user does not send them in the necessary time, consider finding a way to close the connection
-
+        System.out.println(attributes);
+        System.out.println(request.getHeaders());
+        return new Principal() {
+            @Override
+            public String getName() {
+                return "ramziiii";
+            }
+        };
     }
 
 

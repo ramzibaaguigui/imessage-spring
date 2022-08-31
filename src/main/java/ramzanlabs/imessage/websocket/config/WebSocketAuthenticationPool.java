@@ -1,4 +1,4 @@
-package ramzanlabs.imessage.websocket;
+package ramzanlabs.imessage.websocket.config;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -17,10 +17,12 @@ public class WebSocketAuthenticationPool {
     }
 
     public boolean storeAuthentication(String simpSessionId, Authentication authentication) {
+        System.out.println("store auth in pool");
         if (simpSessionId == null || authentication == null) {
             return false;
         }
         this.authPool.put(simpSessionId, authentication);
+        System.out.println(authPool);
         return true;
     }
 

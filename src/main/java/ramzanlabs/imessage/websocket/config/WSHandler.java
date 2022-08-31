@@ -1,4 +1,4 @@
-package ramzanlabs.imessage.websocket;
+package ramzanlabs.imessage.websocket.config;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
@@ -28,6 +28,7 @@ public class WSHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+
         System.out.println("after connection closed is called");
         System.out.println("the session headers are:");
         System.out.println(session.getHandshakeHeaders());

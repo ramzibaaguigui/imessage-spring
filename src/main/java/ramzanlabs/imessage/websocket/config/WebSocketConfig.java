@@ -1,4 +1,4 @@
-package ramzanlabs.imessage.websocket;
+package ramzanlabs.imessage.websocket.config;
 
 import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +13,15 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.*;
 import ramzanlabs.imessage.headers.Headers;
-import ramzanlabs.imessage.user.auth.UserAuthService;
 import ramzanlabs.imessage.user.auth.UserAuthPool;
+import ramzanlabs.imessage.user.auth.UserAuthService;
 
 import static ramzanlabs.imessage.headers.Headers.USER_AUTH_TOKEN;
 
@@ -43,18 +46,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").setHandshakeHandler(userAuthHandshakeHandler()).withSockJS();
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*")
+        //  registry.addEndpoint("/ws").setAllowedOriginPatterns("*").setHandshakeHandler(userAuthHandshakeHandler()).withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .setHandshakeHandler(userAuthHandshakeHandler())
                 .addInterceptors(webSocketHandshakeInterceptor());
-        // .setHandshakeHandler(userAuthHandshakeHandler());
 
     }
 
 
     @Override
     public void configureMessageBroker(org.springframework.messaging.simp.config.MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic", "/queue"); // this is for subscribing
+        registry.enableSimpleBroker("/topic"/*, "/queue"*/); // this is for subscribing
         registry.setApplicationDestinationPrefixes("/app"); // this is for sending
+        registry.setUserDestinationPrefix("/queue");
     }
 
     @Bean
@@ -85,7 +90,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
     private ChannelInterceptor userAuthChannelInterceptor() {
         return new ChannelInterceptor() {
             @Override
+            public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
+                System.out.println("post send is called");
+            }
+
+            @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
                 String simpSessionId = extractSimpSessionId(message);
                 if (messageCommandIsConnect(message)) {
                     // we should verify the auth
@@ -95,30 +106,31 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
                         return null;
 
                     }
+                    System.out.println("THE AUTH TOKEN is: " + authToken);
 
                     Authentication auth = userAuthPool.validateAuthentication(authToken);
+                    System.out.println("the auth is: " + auth);
                     if (auth == null) { // auth not in pool
                         System.out.println("auth not in pool");
+                        System.out.println(authToken);
                         auth = userAuthService.validateAuthentication(authToken);
                         if (auth == null) { // auth not valid
                             System.out.println("auth not valid");
                             return null;
                         }
-                        System.out.println("storing auth in websocket auth pool");
-                        webSocketAuthenticationPool.storeAuthentication(simpSessionId, auth);
-                        SecurityContextHolder.getContext().setAuthentication(auth);
+
                     }
-                    System.out.println("returning " + message);
+                    System.out.println("storing auth in websocket auth pool");
+                    webSocketAuthenticationPool.storeAuthentication(simpSessionId, auth);
+
                     return message;
                 }
 
                 if (messageCommandIsSend(message)) {
                     Authentication auth = webSocketAuthenticationPool.validateAuthentication(simpSessionId);
                     if (auth == null) {
-                        System.out.println("the auth is null");
                         return null;
                     }
-                    SecurityContextHolder.getContext().setAuthentication(auth);
                     return message;
                 }
                 return null;
@@ -136,26 +148,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
                 }
                 return null;
             }
+
         };
     }
 
-    private ChannelInterceptor sendCommandChannelInterceptor() {
-        return new ChannelInterceptor() {
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                System.out.println("presend from send command channel interceptor");
-                return message;
-            }
-        };
-    }
 
     private boolean messageCommandIsConnect(Message<?> message) {
         StompHeaderAccessor accessor = (StompHeaderAccessor) StompHeaderAccessor.getAccessor(message);
-/*
-        System.out.println("the command is: " + accessor.getCommand());
-
-        System.out.println(StompCommand.CONNECT.equals(accessor.getCommand()));
-*/
+        System.out.println(accessor.getMessageHeaders());
         System.out.println("from command is connect");
         System.out.println(accessor.getCommand());
         return StompCommand.CONNECT.equals(accessor.getCommand());
@@ -163,7 +163,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
 
     private boolean messageCommandIsSend(Message<?> message) {
         StompHeaderAccessor accessor = (StompHeaderAccessor) StompHeaderAccessor.getAccessor(message);
-
+        System.out.println(accessor.getMessageHeaders());
         System.out.println("from command is send");
         System.out.println(accessor.getCommand());
         return StompCommand.SEND.equals(accessor.getCommand());
@@ -179,6 +179,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
 
     private String extractSimpSessionId(Message<?> message) {
         return (String) message.getHeaders().get(Headers.WEBSOCKET_SIMP_SESSION_ID);
+    }
+
+    private Long extractUserId(Message<?> message) {
+        return (Long) message.getHeaders().get(Headers.USER_ID_HEADER);
     }
 
 

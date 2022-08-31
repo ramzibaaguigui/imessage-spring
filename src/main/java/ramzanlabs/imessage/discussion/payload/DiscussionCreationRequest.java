@@ -13,6 +13,4 @@ public class DiscussionCreationRequest {
     private String name;
     private List<Long> usersIds;
     private Long createdById;
-
-
 }

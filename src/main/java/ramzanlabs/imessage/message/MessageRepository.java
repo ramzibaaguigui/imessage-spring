@@ -12,7 +12,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     Boolean deleteMessageById(Long id);
 
-    @Query("select m from Message m where m.discussion = ?1 and m.sentAt < ?2 and m.isDeleted = ?3 order by m.sentAt")
+    @Query("select m from Message m where m.discussion.id = ?1 and m.sentAt < ?2 and m.isDeleted = ?3 order by m.sentAt")
     List<Message> findMessagesByDiscussionAndSentAtBeforeAndIsDeletedIsOrderBySentAtDesc(
             Long discussionId, Date sentBefore, Boolean isDeleted
     );

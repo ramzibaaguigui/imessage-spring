@@ -1,4 +1,4 @@
-package ramzanlabs.imessage.websocket;
+package ramzanlabs.imessage.websocket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -13,21 +13,22 @@ import ramzanlabs.imessage.websocket.payload.SendMessagePayload;
 @Service
 public class ChatWebSocketService {
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
+    private final DiscussionService discussionService;
 
     @Autowired
-    private DiscussionService discussionService;
+    public ChatWebSocketService(MessageService messageService,
+                                DiscussionService discussionService) {
+        this.messageService = messageService;
+        this.discussionService = discussionService;
+    }
 
     public Message sendMessage(SendMessagePayload sendMessagePayload,
                                               @Nullable User sender) {
         if (sender == null || !validateSendMessagePayload(sendMessagePayload)) {
             return null;
         }
-        // the user is non null
-        // the send message payload is valid
-        Discussion discussion = discussionService.getDiscussionById(sendMessagePayload.getDiscussionId());
-
+        System.out.println("message mapping, sending the message");
         return messageService.sendMessage(sender, sendMessagePayload);
     }
 

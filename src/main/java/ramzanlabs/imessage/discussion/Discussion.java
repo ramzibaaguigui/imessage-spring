@@ -2,13 +2,14 @@ package ramzanlabs.imessage.discussion;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.annotations.Fetch;
-import ramzanlabs.imessage.message.Message;
-import ramzanlabs.imessage.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import ramzanlabs.imessage.message.Message;
+import ramzanlabs.imessage.user.User;
 
 import javax.persistence.*;
 import java.util.*;
@@ -28,15 +29,18 @@ public class Discussion {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_discussions",
-    joinColumns = @JoinColumn(name = "discussion_id"),
-    inverseJoinColumns = @JoinColumn(name = "user_id"))
-    @JsonIgnore
+            joinColumns = @JoinColumn(name = "discussion_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JsonProperty("users")
     private Set<User> users = new HashSet<>();
 
     @Column(name = "discussion_name")
     private String name;
 
-    @OneToMany(mappedBy = "discussion")
+    @OneToMany(mappedBy = "discussion",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL)
+    @Fetch(FetchMode.SUBSELECT)
     @JsonIgnore
     private List<Message> messages = new ArrayList<>();
 
@@ -50,7 +54,7 @@ public class Discussion {
 
 
     public void addUsers(User... users) {
-        for (User user: users) {
+        for (User user : users) {
             if (!userExists(user))
                 this.users.add(user);
         }

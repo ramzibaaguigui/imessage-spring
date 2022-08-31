@@ -39,4 +39,9 @@ public class MessageSetGetRequest {
         this.discussionId = discussionId;
         return this;
     }
+
+    public MessageSetGetRequest sentBefore(Date sentBefore) {
+        this.sentBefore = sentBefore;
+        return this;
+    }
 }

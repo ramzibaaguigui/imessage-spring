@@ -1,5 +1,7 @@
 package ramzanlabs.imessage.message;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ramzanlabs.imessage.date.TimeUtils;
 import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.discussion.DiscussionRepository;
@@ -7,8 +9,6 @@ import ramzanlabs.imessage.message.payload.MessageSetGetRequest;
 import ramzanlabs.imessage.message.payload.MessageSetPostRequest;
 import ramzanlabs.imessage.user.User;
 import ramzanlabs.imessage.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ramzanlabs.imessage.websocket.payload.SendMessagePayload;
 
 import java.time.Instant;
@@ -16,21 +16,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
-    @Autowired
-    TimeUtils time;
+
+    private final TimeUtils time;
+    private final UserRepository userRepository;
+    private final DiscussionRepository discussionRepository;
+    private final MessageRepository messageRepository;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    DiscussionRepository discussionRepository;
-
-    @Autowired
-    MessageRepository messageRepository;
-
+    public MessageService(TimeUtils time,
+                          UserRepository userRepository,
+                          DiscussionRepository discussionRepository,
+                          MessageRepository messageRepository) {
+        this.time = time;
+        this.userRepository = userRepository;
+        this.discussionRepository = discussionRepository;
+        this.messageRepository = messageRepository;
+    }
 
     public boolean deleteMessage(Long messageId) {
         Optional<Message> message = messageRepository.getMessageById(messageId);
@@ -59,11 +64,14 @@ public class MessageService {
         Long discussionId = messageSetRequest.getDiscussionId();
         int limitMessageCount = messageSetRequest.getLimitMessageCount();
         Date newestDate = messageSetRequest.getSentBefore();
-
-        return (List<Message>) messageRepository.findMessagesByDiscussionAndSentAtBeforeAndIsDeletedIsOrderBySentAtDesc(
+        // todo: the problem is here
+        // TODO: the service is not returning the discussion messages
+        // todo: YOU SHOULD CONSIDER FINDING THE PROBLEM IN IT
+        return messageRepository.findMessagesByDiscussionAndSentAtBeforeAndIsDeletedIsOrderBySentAtDesc(
                         discussionId, newestDate, false)
                 .stream()
-                .limit(limitMessageCount);
+                .limit(limitMessageCount)
+                .collect(Collectors.toList());
     }
 
     public List<Message> postMessages(MessageSetPostRequest messageSetPostRequest) {

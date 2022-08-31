@@ -1,4 +1,4 @@
-package ramzanlabs.imessage.websocket;
+package ramzanlabs.imessage.websocket.config;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;

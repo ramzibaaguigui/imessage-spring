@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ramzanlabs.imessage.date.TimeUtils;
 import ramzanlabs.imessage.discussion.DiscussionService;
 import ramzanlabs.imessage.message.payload.MessageSetGetRequest;
 import ramzanlabs.imessage.message.payload.MessageSetPostRequest;
@@ -11,6 +12,7 @@ import ramzanlabs.imessage.user.UserService;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Controller
 public class MessageController {
@@ -23,6 +25,9 @@ public class MessageController {
 
     @Autowired
     DiscussionService discussionService;
+
+    @Autowired
+    private TimeUtils time;
 
     @GetMapping("/message/{messageId}")
     public ResponseEntity<Message> getMessage(@PathVariable Long messageId) {
@@ -40,13 +45,16 @@ public class MessageController {
                                    @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
         var messageSetRequest = MessageSetGetRequest.create()
                 .discussionId(discussionId)
-                .limitMessages(limit);
+                .limitMessages(limit)
+                .sentBefore(time.now());
         List<Message> messages = messageService.getMessageList(messageSetRequest);
         if (messages != null) {
+            System.out.println("printing the message list");
+            System.out.println(messages.stream().map(Message::toPayload).collect(Collectors.toList()));
             return ResponseEntity.ok(
                     messages.stream().map(
                             Message::toPayload
-                    )
+                    ).collect(Collectors.toList())
             );
         } else {
             return ResponseEntity.badRequest().build();

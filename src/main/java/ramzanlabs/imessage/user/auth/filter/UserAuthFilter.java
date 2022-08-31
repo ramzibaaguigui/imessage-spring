@@ -19,7 +19,12 @@ import java.io.IOException;
 
 @Component
 public class UserAuthFilter extends OncePerRequestFilter {
-
+    /*
+    Todo: Important note, consider switching to the usage of REST with sending messages
+    TODO: The only thing websocket is going to be used for is the user notification,
+    Todo: So the user posts the messages via rest and receives the notifications via the websocket in case
+    TODO: he is just a receiver
+     */
     private final UserAuthService userAuthService;
     private final AuthHeaderManipulator authHeaderManipulator;
     private final UserAuthPool userAuthenticationPool;

@@ -47,7 +47,7 @@ public class Message {
     @JsonIgnore
     private User sender;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "discussion_id")
     @JsonIgnore
     private Discussion discussion;
@@ -62,7 +62,7 @@ public class Message {
         return this.discussion.getId();
     }
 
-    public MessagePayload toPayload() {
+    public MessagePayload   toPayload() {
         return MessagePayload.create()
                 .withId(getId())
                 .withContent(getContent())
