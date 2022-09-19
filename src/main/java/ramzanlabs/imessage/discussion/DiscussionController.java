@@ -1,31 +1,32 @@
 package ramzanlabs.imessage.discussion;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ramzanlabs.imessage.discussion.payload.CreateDiscussionRequestPayload;
-import ramzanlabs.imessage.discussion.payload.DiscussionInquiryRequestPayload;
 import ramzanlabs.imessage.discussion.payload.DiscussionInquiryResponsePayload;
 import ramzanlabs.imessage.headers.Headers;
 import ramzanlabs.imessage.user.User;
 import ramzanlabs.imessage.user.UserService;
 import ramzanlabs.imessage.user.auth.UserAuth;
 
-import java.security.Principal;
 import java.util.Objects;
 import java.util.Set;
 
 @Controller
 public class DiscussionController {
 
-    @Autowired
-    DiscussionService discussionService;
+    private final DiscussionService discussionService;
+    private final UserService userService;
 
     @Autowired
-    UserService userService;
+    public DiscussionController(DiscussionService discussionService,
+                                UserService userService) {
+        this.discussionService = discussionService;
+        this.userService = userService;
+    }
 
     @PostMapping("/discussion/create")
     public ResponseEntity<?> createDiscussion(@RequestBody CreateDiscussionRequestPayload createDiscussionRequestPayload,

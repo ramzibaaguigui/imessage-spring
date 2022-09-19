@@ -18,20 +18,25 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
+
+    private final UserRepository userRepository;
+    private final DiscussionRepository discussionRepository;
+    private final UserValidator userValidator;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserAuthService userAuthService;
 
     @Autowired
-    DiscussionRepository discussionRepository;
-
-    @Autowired
-    UserValidator userValidator;
-
-    @Autowired
-    BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    UserAuthService userAuthService;
+    public UserService(UserRepository userRepository,
+                       DiscussionRepository discussionRepository,
+                       UserValidator userValidator,
+                       BCryptPasswordEncoder passwordEncoder,
+                       UserAuthService userAuthService) {
+        this.userRepository = userRepository;
+        this.discussionRepository = discussionRepository;
+        this.userValidator = userValidator;
+        this.passwordEncoder  = passwordEncoder;
+        this.userAuthService = userAuthService;
+    }
 
 
     public User updateUserFirstName(Long userId, String firstName) {

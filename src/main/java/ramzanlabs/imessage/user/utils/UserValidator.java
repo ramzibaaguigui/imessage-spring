@@ -1,10 +1,10 @@
 package ramzanlabs.imessage.user.utils;
 
-import ramzanlabs.imessage.user.User;
-import ramzanlabs.imessage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import ramzanlabs.imessage.user.User;
+import ramzanlabs.imessage.user.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,12 +13,15 @@ import java.util.stream.Collectors;
 @Component
 public class UserValidator {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    BCryptPasswordEncoder passwordEncoder;
-
+    public UserValidator(UserRepository userRepository,
+                         BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public boolean validateUserRegistration(User user) {
         try {
@@ -31,30 +34,21 @@ public class UserValidator {
     }
 
     public User validateUserAuthentication(User user) {
+/*
 //        if (Objects.nonNull(user.getUserName()) && Objects.nonNull(user.getPassword())) {
         System.out.println("here are the encoded passwords");
 
         System.out.println(passwordEncoder.encode("password"));
         System.out.println(passwordEncoder.encode("password"));
+*/
 
         if (user.getUserName() != null && user.getPassword() != null) {
             // trimming username
             user.setUserName(user.getUserName().trim());
-
-            // encrypting password
-            // user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-            System.out.println(user);
-            User returnedUser = getUserByUserNameAndPassword(user.getUserName(), user.getPassword());
-            System.out.println("Here is the official thing");
-
-            System.out.println(returnedUser);
-            return returnedUser;
-        } else {
-            System.out.println("It says that the user is null");
+            return getUserByUserNameAndPassword(user.getUserName(), user.getPassword());
         }
-        return null;
 
+        return null;
     }
 
     private User findUserByUsernameAndPassword(String username, String password) {

@@ -8,8 +8,12 @@ import ramzanlabs.imessage.date.TimeUtils;
 import ramzanlabs.imessage.discussion.DiscussionService;
 import ramzanlabs.imessage.message.payload.MessageSetGetRequest;
 import ramzanlabs.imessage.message.payload.MessageSetPostRequest;
+import ramzanlabs.imessage.message.payload.PostMessagePayload;
+import ramzanlabs.imessage.user.User;
 import ramzanlabs.imessage.user.UserService;
+import ramzanlabs.imessage.user.auth.UserAuth;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,17 +21,22 @@ import java.util.stream.Collectors;
 @Controller
 public class MessageController {
 
-    @Autowired
-    MessageService messageService;
+    private final MessageService messageService;
+    private final UserService userService;
+    private final DiscussionService discussionService;
+    private final TimeUtils time;
 
     @Autowired
-    UserService userService;
+    public MessageController(MessageService messageService,
+                             UserService userService,
+                             DiscussionService discussionService,
+                             TimeUtils time) {
+        this.messageService = messageService;
+        this.userService = userService;
+        this.discussionService = discussionService;
+        this.time = time;
+    }
 
-    @Autowired
-    DiscussionService discussionService;
-
-    @Autowired
-    private TimeUtils time;
 
     @GetMapping("/message/{messageId}")
     public ResponseEntity<Message> getMessage(@PathVariable Long messageId) {
@@ -61,10 +70,31 @@ public class MessageController {
         }
     }
 
-    // TODO: WORK on this later
-    @GetMapping("/discussion/{discussionId}/messages/more")
-    public ResponseEntity<?> getMoreMessagesInDiscussion() {
-        return null;
+    @GetMapping("/discussion/{discussionId}/messages/all")
+    public ResponseEntity<?> getDiscussionMessages(Principal principal, @PathVariable("discussionId") Long discussionId) {
+
+        User current = ((UserAuth) principal).getAuthUser();
+        try {
+            return ResponseEntity.ok(
+                    messageService.getAllDiscussionMessages(current, discussionId)
+            );
+        } catch (AssertionError e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/discussion/{discussionId}/more")
+    public ResponseEntity<?> getMoreMessages(Principal principal, @PathVariable("discussionId") Long discussionId,
+                                             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
+                                             @RequestParam(value = "lastId") Long lastMessageId) {
+        User current = ((UserAuth) principal).getAuthUser();
+        try {
+            return ResponseEntity.ok(
+                    messageService.getMoreMessages  (current, discussionId, lastMessageId, limit)
+            );
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/messages/post")
@@ -74,6 +104,13 @@ public class MessageController {
             return ResponseEntity.ok(postedMessages);
         }
         return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping("/messages/post/one")
+    public ResponseEntity<?> postMessage(@RequestBody PostMessagePayload messagePayload, Principal principal) {
+        User current = ((UserAuth) principal).getAuthUser();
+        Message sentMessage = messageService.postMessage(current, messagePayload);
+        return ResponseEntity.ok(sentMessage);
     }
 
 
@@ -97,4 +134,6 @@ public class MessageController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
 }

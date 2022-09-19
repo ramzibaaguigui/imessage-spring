@@ -1,2 +1,10 @@
-package ramzanlabs.imessage.message.payload;public class PostMessagePaylod {
+package ramzanlabs.imessage.message.payload;
+
+
+import lombok.Getter;
+
+@Getter
+public class PostMessagePayload {
+    private String content;
+    private Long discussionId;
 }

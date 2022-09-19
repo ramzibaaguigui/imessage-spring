@@ -95,4 +95,9 @@ public class Discussion {
         return users.size();
     }
 
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, users, name, messages, createdBy, createdAt);
+    }
 }

@@ -13,7 +13,6 @@ import ramzanlabs.imessage.user.auth.UserAuthService;
 import ramzanlabs.imessage.user.utils.UserValidator;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -23,14 +22,16 @@ import java.util.Set;
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+    private final UserValidator userValidator;
+    private final UserAuthService userAuthService;
 
     @Autowired
-    UserValidator userValidator;
-
-    @Autowired
-    UserAuthService userAuthService;
+    public UserController(UserService userService, UserValidator userValidator, UserAuthService userAuthService) {
+        this.userService = userService;
+        this.userValidator = userValidator;
+        this.userAuthService = userAuthService;
+    }
 
     @PostMapping("/user/create")
     public ResponseEntity<?> createUser(@RequestBody User user) {
@@ -103,8 +104,8 @@ public class UserController {
         }
     }
 
-    @GetMapping("/user/email/{email}")
-    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+    @GetMapping("/user/email")
+    public ResponseEntity<?> getUserByEmail(@RequestParam("email") String email) {
         User user = userService.getUserByEmail(email);
         if (Objects.nonNull(user)) {
             return ResponseEntity.ok(user);

@@ -71,5 +71,4 @@ public class Message {
                 .senderUsername(getSender().getUserName());
     }
 
-
 }

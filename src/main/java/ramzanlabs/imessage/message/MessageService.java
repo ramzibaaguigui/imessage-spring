@@ -7,15 +7,13 @@ import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.discussion.DiscussionRepository;
 import ramzanlabs.imessage.message.payload.MessageSetGetRequest;
 import ramzanlabs.imessage.message.payload.MessageSetPostRequest;
+import ramzanlabs.imessage.message.payload.PostMessagePayload;
 import ramzanlabs.imessage.user.User;
 import ramzanlabs.imessage.user.UserRepository;
 import ramzanlabs.imessage.websocket.payload.SendMessagePayload;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -127,4 +125,58 @@ public class MessageService {
         return message;
     }
 
+    public Message postMessage(User sender, PostMessagePayload payload) {
+        assert payload != null : "the message payload should never be null";
+        assert payload.getContent() != null : "the message content should never be null";
+        assert payload.getDiscussionId() != null : "the discussoin id should never be null";
+
+        Discussion discussion = discussionRepository.getDiscussionById(payload.getDiscussionId()).orElse(null);
+        assert discussion != null : "the discussion should never be null";
+        assert discussion.hasUser(sender) : "this user is not in the discussion";
+
+        Message message = new Message();
+        message.setContent(payload.getContent());
+        message.setSender(sender);
+        message.setIsDeleted(false);
+        message.setDiscussion(discussion);
+        Date now = time.now();
+        message.setSentAt(now);
+        message.setUpdatedAt(now);
+        return messageRepository.save(message);
+    }
+
+    /*
+    TODO: consider fixing the issue that is here
+    TODO: if we pass no discussion id, we get all the messages returned back
+
+     */
+    public List<Message> getAllDiscussionMessages(User current, Long discussionId) {
+        assert discussionId != null : "the discussion id should never be null";
+        Discussion discussion = discussionRepository.getDiscussionById(discussionId).orElse(null);
+        assert discussion != null : "the discussion is not found";
+        assert discussion.hasUser(current) : "the current user cannot send messages to this discussion";
+
+        return messageRepository.findAll().stream()
+                .filter(message -> message.getDiscussion().equals(discussion))
+                .filter(message -> !message.getIsDeleted())
+                .sorted(Comparator.comparingDouble(Message::getId))
+                .collect(Collectors.toList());
+    }
+
+
+    public List<Message> getMoreMessages(User currentUser, Long discussionId, Long oldestMessageId, Integer limit) {
+        Discussion discussion = discussionRepository.getDiscussionById(discussionId).orElse(null);
+
+        assert discussion != null : "the discussion should never be null";
+        assert discussion.hasUser(currentUser);
+        assert oldestMessageId >= 0;
+        assert limit >= 1;
+
+        return messageRepository.findAll()
+                .stream()
+                .filter(message -> !message.getIsDeleted())
+                .filter(message -> message.getId() < oldestMessageId)
+                .sorted(Comparator.comparingLong(Message::getDiscussionId))
+                .collect(Collectors.toList());
+    }
 }
