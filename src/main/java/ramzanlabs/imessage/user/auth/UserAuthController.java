@@ -1,5 +1,6 @@
 package ramzanlabs.imessage.user.auth;
 
+import ramzanlabs.imessage.user.auth.exception.UsernamePasswordNotFoundException;
 import ramzanlabs.imessage.user.auth.payload.UserLogoutRequestPayload;
 import ramzanlabs.imessage.user.auth.payload.UserAuthRequestPayload;
 import ramzanlabs.imessage.user.auth.utility.AuthHeaderManipulator;
@@ -16,39 +17,32 @@ import java.util.Set;
 @CrossOrigin(origins = "*")
 public class UserAuthController {
 
-    @Autowired
-    UserAuthService userAuthService;
+    private final UserAuthService userAuthService;
+    private final AuthHeaderManipulator headerManipulator;
 
     @Autowired
-    AuthHeaderManipulator headerManipulator;
+    public UserAuthController(UserAuthService userAuthService, AuthHeaderManipulator authHeaderManipulator) {
+        this.userAuthService = userAuthService;
+        this.headerManipulator = authHeaderManipulator;
+    }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody UserAuthRequestPayload authPayload, @RequestHeader HttpHeaders request) {
-        UserAuth userAuth = userAuthService.authenticate(authPayload);
 
-        printHeaders(request);
-        if (userAuth != null) {
+        try {
+            UserAuth userAuth = userAuthService.authenticate(authPayload);
+
             ResponseEntity<?> response = ResponseEntity.ok(userAuth);
             headerManipulator.addAuthTokenHeader(response, userAuth);
             return response;
+
+
+        } catch (UsernamePasswordNotFoundException exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .build();
+
         }
-
-        // if the user auth is not valid
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .build();
     }
-
-    private void printHeaders(HttpHeaders headers) {
-        System.out.println("000000000000000000000000000000000000000000000000000000000000000000000000000000");
-        Set<String> keySet = headers.keySet();
-        for (String key : keySet) {
-            System.out.println(key + " " + headers.get(key));
-        }
-
-        System.out.println("000000000000000000000000000000000000000000000000000000000000000000000000000000");
-
-    }
-
 
 
     @DeleteMapping("/logout")

@@ -4,7 +4,7 @@ import net.bytebuddy.utility.RandomString;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthTokenGenerator {
+public class TokenGenerator {
     private static final int TOKEN_LENGTH = 64;
 
     public String generateRandomToken() {

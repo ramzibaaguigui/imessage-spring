@@ -1,9 +1,11 @@
 package ramzanlabs.imessage.user;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.discussion.DiscussionRepository;
 import ramzanlabs.imessage.user.auth.UserAuthService;
+import ramzanlabs.imessage.user.exception.NullSearchQueryException;
 import ramzanlabs.imessage.user.utils.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -18,21 +20,25 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
+
+    private final UserRepository userRepository;
+    private final DiscussionRepository discussionRepository;
+    private final UserValidator userValidator;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserAuthService userAuthService;
 
     @Autowired
-    DiscussionRepository discussionRepository;
-
-    @Autowired
-    UserValidator userValidator;
-
-    @Autowired
-    BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    UserAuthService userAuthService;
-
+    public UserService(UserRepository userRepository,
+                       DiscussionRepository discussionRepository,
+                       UserValidator userValidator,
+                       BCryptPasswordEncoder passwordEncoder,
+                       UserAuthService userAuthService) {
+        this.userRepository = userRepository;
+        this.discussionRepository = discussionRepository;
+        this.userValidator = userValidator;
+        this.userAuthService = userAuthService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User updateUserFirstName(Long userId, String firstName) {
 
@@ -93,6 +99,7 @@ public class UserService {
         Optional<User> user = userRepository.getUserById(userId);
         return user.map(User::getDiscussions).orElse(null);
     }
+
     public List<Discussion> getUserDiscussions(String authToken) {
         User user = userAuthService.validateUserAuthentication(authToken);
         System.out.println(user);
@@ -135,9 +142,9 @@ public class UserService {
         return authUser.orElse(null);
     }
 
-    public Set<User> searchUsers(String searchQuery) {
+    public Set<User> searchUsers(String searchQuery) throws NullSearchQueryException {
         if (searchQuery == null) {
-            return null;
+            throw new NullSearchQueryException("the search query should never be null");
         }
 
         Set<User> users = userRepository.findAll()
@@ -159,6 +166,11 @@ public class UserService {
         return user.getDiscussions().stream().filter(discussion -> discussion.hasUser(user))
                 .flatMap(discussion -> discussion.getUsers().stream())
                 .collect(Collectors.toSet());
+    }
+
+    public User updateUserProfileUrl(User user, String newImageUrl) {
+        user.setImageUrl(newImageUrl);
+        return userRepository.save(user);
     }
 
 }

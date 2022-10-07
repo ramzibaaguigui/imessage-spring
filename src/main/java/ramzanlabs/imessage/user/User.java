@@ -33,7 +33,6 @@ public class User implements Principal {
     @JsonProperty("first_name")
     private String firstName;
 
-
     @Id
     @Column(name = "user_id", unique = true)
     @GeneratedValue(strategy = GenerationType.AUTO)

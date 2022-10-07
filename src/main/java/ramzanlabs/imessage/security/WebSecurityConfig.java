@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import ramzanlabs.imessage.user.auth.filter.UserAuthFilter;
 
 
@@ -39,11 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(userAuthFilter, BasicAuthenticationFilter.class);
         http.authorizeRequests()
+                .antMatchers("/uploads/**").permitAll()
                 .antMatchers("/authenticate", "/user/create").permitAll()
                 .and().authorizeRequests().antMatchers("/ws").permitAll()
                 .and().authorizeRequests().anyRequest().authenticated()
                 .and().cors()
                 .and().csrf().disable();
     }
+
 
 }

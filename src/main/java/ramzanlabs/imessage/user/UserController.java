@@ -7,11 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.headers.Headers;
+import ramzanlabs.imessage.user.auth.UserAuth;
 import ramzanlabs.imessage.user.auth.UserAuthService;
+import ramzanlabs.imessage.user.exception.CannotCreateImageFolderException;
+import ramzanlabs.imessage.user.exception.FileTypeNotImageException;
+import ramzanlabs.imessage.user.exception.MaximumImageSizeExceededException;
+import ramzanlabs.imessage.user.exception.NullSearchQueryException;
+import ramzanlabs.imessage.user.file.ImageUploadService;
 import ramzanlabs.imessage.user.utils.UserValidator;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +32,19 @@ import java.util.Set;
 public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+    private final UserValidator userValidator;
+
+
+    private final ImageUploadService imageUploadService;
 
     @Autowired
-    UserValidator userValidator;
-
-    @Autowired
-    UserAuthService userAuthService;
+    public UserController(UserService userService, UserValidator userValidator,
+                          ImageUploadService imageUploadService) {
+        this.userService = userService;
+        this.userValidator = userValidator;
+        this.imageUploadService = imageUploadService;
+    }
 
     @PostMapping("/user/create")
     public ResponseEntity<?> createUser(@RequestBody User user) {
@@ -137,12 +151,12 @@ public class UserController {
 
     @GetMapping("user/search")
     public ResponseEntity<?> searchUser(@RequestParam("q") String searchQuery) {
-        Set<User> users = userService.searchUsers(searchQuery);
-        if (users == null) {
+        try {
+            Set<User> users = userService.searchUsers(searchQuery);
+            return ResponseEntity.ok(users);
+        } catch (NullSearchQueryException exception) {
             return ResponseEntity.badRequest().build();
         }
-
-        return ResponseEntity.ok(users);
     }
 
     @GetMapping("users/all")
@@ -154,8 +168,35 @@ public class UserController {
     @GetMapping("users/contacts")
     public ResponseEntity<?> getContacts(Principal principal) {
         User user = (User) principal;
+        
         return ResponseEntity.ok(userService.
                 getAllContacts(user));
+    }
+
+    @PostMapping("/user/update/profile/image")
+    public ResponseEntity<?> updateProfileImage(Principal principal, @RequestPart(value = "image_file") MultipartFile imageFile) {
+        User currentUser = ((UserAuth) principal).getAuthUser();
+        System.out.println("the currently logged user is");
+        System.out.println(currentUser);
+        try {
+            User updatedUser = imageUploadService.updateProfileImage(currentUser, imageFile);
+            return ResponseEntity.ok(updatedUser);
+        } catch (FileTypeNotImageException exception) {
+            System.out.println("file type not image");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+        } catch (MaximumImageSizeExceededException exception) {
+            System.out.println("payload too large ");
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).build();
+        } catch (IOException exception) {
+            LOGGER.debug(exception.getMessage());
+            System.out.println("io exception");
+            return ResponseEntity.internalServerError().build();
+        } catch (CannotCreateImageFolderException exception) {
+            System.out.println("cannot create folder exception");
+            return ResponseEntity.internalServerError().build();
+
+        }
+
     }
 
 }

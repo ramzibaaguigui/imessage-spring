@@ -86,10 +86,13 @@ public class UserAuthFilter extends OncePerRequestFilter {
     }
 
 
+
     private void unauthorizeResponse(HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write("UNAUTHORIZED");
     }
+
+
 
     private void setUserAuth(Authentication authentication) {
         SecurityContextHolder.getContext().setAuthentication(authentication);

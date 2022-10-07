@@ -1,10 +1,9 @@
 package ramzanlabs.imessage.user.auth;
 
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 import ramzanlabs.imessage.user.UserService;
 import ramzanlabs.imessage.user.auth.config.TokenDuration;
+import ramzanlabs.imessage.user.auth.exception.UsernamePasswordNotFoundException;
 import ramzanlabs.imessage.user.auth.payload.UserAuthRequestPayload;
 import ramzanlabs.imessage.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +25,17 @@ public class UserAuthService {
     UserService userService;
 
     @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    TokenGenerator authTokenGenerator;
 
-    public UserAuth authenticate(UserAuthRequestPayload authRequestPayload) {
+    public UserAuth authenticate(UserAuthRequestPayload authRequestPayload) throws UsernamePasswordNotFoundException {
         User user = userService.findUserByUsernameAndPassword(
                 authRequestPayload.getUsername(),
                 authRequestPayload.getPassword()
         );
-
-        if (user != null) {
-            return generateAuthForUser(user);
-
+        if (user == null) {
+            throw new UsernamePasswordNotFoundException("no user with such credentials");
         }
-        return null;
+        return generateAuthForUser(user);
     }
 
     public boolean logout(String authToken, Instant issuedAt) {
@@ -58,7 +55,7 @@ public class UserAuthService {
 
     //TODO: consider fixing this, it returns null even if the token is valid
     public User validateUserAuthentication(String token) {
-        if (token == null){
+        if (token == null) {
             return null;
         }
 
@@ -93,7 +90,6 @@ public class UserAuthService {
     }
 
 
-
     private UserAuth generateAuthForUser(User user) {
         Instant issuedAt = Instant.now();
         Instant expireAt = TokenDuration.getTokenExpireAt(issuedAt);
@@ -114,7 +110,6 @@ public class UserAuthService {
     public void removeInvalidAuthentications() {
         userAuthRepository.deleteUserAuthsByAuthIsValidFalseOrExpireAtBefore(Instant.now());
     }
-
 
 
 }

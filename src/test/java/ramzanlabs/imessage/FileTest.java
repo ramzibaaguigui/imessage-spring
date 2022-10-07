@@ -2,6 +2,7 @@ package ramzanlabs.imessage;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ramzanlabs.imessage.user.Constants;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -22,7 +23,7 @@ public class FileTest {
             // Files.createDirectory(root.resolve("child"));
             System.out.println("file created");
             File file = new File(root.resolve("file.txt").toString());
-//            file.renameTo(new File("file.txt"));
+            file.renameTo(new File("file.txt"));
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.append("hello world this is ietoi ");
             fileWriter.close();
@@ -33,6 +34,5 @@ public class FileTest {
 
 
     }
-
 
 }
