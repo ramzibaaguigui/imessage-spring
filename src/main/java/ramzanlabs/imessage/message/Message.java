@@ -72,4 +72,11 @@ public class Message {
     }
 
 
+    public boolean isInDiscussion(Discussion discussion) {
+        return this.getDiscussion().getId().equals(discussion.getId());
+    }
+
+    public boolean isSentBy(User user) {
+        return this.getSender().getId().equals(user.getId());
+    }
 }

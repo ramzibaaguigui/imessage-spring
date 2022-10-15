@@ -1,12 +1,11 @@
 package ramzanlabs.imessage.user.validation;
 
-import com.mysql.cj.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import ramzanlabs.imessage.date.TimeUtils;
+import ramzanlabs.imessage.utils.TimeUtils;
 import ramzanlabs.imessage.user.User;
 import ramzanlabs.imessage.user.UserRepository;
 import ramzanlabs.imessage.user.auth.TokenGenerator;

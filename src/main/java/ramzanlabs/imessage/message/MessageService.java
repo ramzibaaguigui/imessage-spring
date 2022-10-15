@@ -1,6 +1,9 @@
 package ramzanlabs.imessage.message;
 
-import ramzanlabs.imessage.date.TimeUtils;
+import com.mysql.cj.util.TimeUtil;
+import org.springframework.http.ResponseEntity;
+import ramzanlabs.imessage.message.exception.*;
+import ramzanlabs.imessage.utils.TimeUtils;
 import ramzanlabs.imessage.discussion.Discussion;
 import ramzanlabs.imessage.discussion.DiscussionRepository;
 import ramzanlabs.imessage.message.payload.MessageSetGetRequest;
@@ -12,24 +15,24 @@ import org.springframework.stereotype.Service;
 import ramzanlabs.imessage.websocket.payload.SendMessagePayload;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
-    @Autowired
-    TimeUtils time;
+    private final TimeUtils time;
+    private final UserRepository userRepository;
+    private final DiscussionRepository discussionRepository;
+    private final MessageRepository messageRepository;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    DiscussionRepository discussionRepository;
-
-    @Autowired
-    MessageRepository messageRepository;
+    public MessageService(TimeUtils time, UserRepository userRepository, DiscussionRepository discussionRepository, MessageRepository messageRepository) {
+        this.time = time;
+        this.userRepository = userRepository;
+        this.discussionRepository = discussionRepository;
+        this.messageRepository = messageRepository;
+    }
 
 
     public boolean deleteMessage(Long messageId) {
@@ -48,6 +51,34 @@ public class MessageService {
             return messageRepository.save(message.get());
         }
         return null;
+    }
+
+    public Message updateMessage(User sender, Long discussionId, Long messageId, String newContent)
+            throws Throwable, MessageNotFoundException, MessageNotInDiscussionException, MessageNotSentByCurrentUserException {
+        Discussion discussion = discussionRepository.getDiscussionById(discussionId).orElseThrow(new Supplier<Throwable>() {
+            @Override
+            public Throwable get() {
+                return new DiscussionNotFoundException("Cannot find discussion " + discussionId);
+            }
+        });
+
+        Message message = messageRepository.getMessageById(messageId).orElseThrow(new Supplier<Throwable>() {
+            @Override
+            public Throwable get() {
+                return new MessageNotFoundException("Cannot find message " + messageId + " in discussion " + discussionId);
+            }
+        });
+
+        if (!message.isInDiscussion(discussion)){
+            throw new MessageNotInDiscussionException("Cannot find message " + messageId + " in discussion " + discussionId);
+        }
+
+        if (!message.getSender().getId().equals(sender.getId())) {
+            throw new MessageNotSentByCurrentUserException(String.format("Message %d was not send by %d", messageId, sender.getId()));
+        }
+        message.setContent(newContent);
+        return messageRepository.save(message);
+
     }
 
     public Message getMessageById(Long messageId) {
@@ -119,4 +150,50 @@ public class MessageService {
         return message;
     }
 
+    public Long deleteMessage(User currentUser, Long discussionId, Long messageId)
+            throws Throwable, UserNotInDiscussionException, MessageNotFoundException,
+            MessageNotInDiscussionException, MessageNotSentByCurrentUserException{
+        Discussion discussion = discussionRepository.getDiscussionById(discussionId)
+                .orElseThrow((Supplier<Throwable>) () -> new DiscussionNotFoundException("Cannot find discussion with id: " + discussionId));
+
+        if (!discussion.hasUser(currentUser)) {
+            throw new UserNotInDiscussionException(
+                    String.format("The user with id %d is not a member of the discussion with id %d",
+                            currentUser.getId(),
+                            discussion.getId()));
+        }
+        Message messageToDelete = messageRepository.getMessageById(messageId).orElseThrow(new Supplier<Throwable>() {
+            @Override
+            public Throwable get() {
+                return new MessageNotFoundException("Cannot find message with id " + messageId);
+            }
+        });
+
+        if (!messageToDelete.isInDiscussion(discussion)) {
+            throw new MessageNotInDiscussionException("The message with id " + messageId + " is not in the discussion with id " + discussionId);
+        }
+
+        if (!messageToDelete.isSentBy(currentUser)) {
+            throw new MessageNotSentByCurrentUserException("The user " + currentUser.getId() + " cannot delete the message " + messageId);
+        }
+        messageRepository.delete(messageToDelete);
+        return messageId;
+    }
+
+    public List<Message> getLastDiscussionMessagesBeforeMessage(Long discussionId, Long messageId) throws Throwable{
+
+        Discussion discussion = discussionRepository.getDiscussionById(discussionId)
+                .orElseThrow(new Supplier<Throwable>() {
+                    @Override
+                    public Throwable get() {
+                        return new DiscussionNotFoundException("Cannot find discussion with id " + discussionId);
+                    }
+                });
+        return discussion.getMessages()
+                .stream()
+                .filter(message -> Long.compare(message.getId(), messageId) < 0)
+                .sorted((message1, message2) -> message1.getId().compareTo(message2.getId()))
+                .collect(Collectors.toList());
+
+    }
 }

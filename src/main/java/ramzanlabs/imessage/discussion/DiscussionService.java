@@ -1,6 +1,6 @@
 package ramzanlabs.imessage.discussion;
 
-import ramzanlabs.imessage.date.TimeUtils;
+import ramzanlabs.imessage.utils.TimeUtils;
 import ramzanlabs.imessage.discussion.payload.CreateDiscussionRequestPayload;
 import ramzanlabs.imessage.discussion.payload.DiscussionCreationRequest;
 import ramzanlabs.imessage.message.MessageRepository;

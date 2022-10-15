@@ -1,4 +1,4 @@
-package ramzanlabs.imessage.date;
+package ramzanlabs.imessage.utils;
 
 import org.springframework.stereotype.Component;
 

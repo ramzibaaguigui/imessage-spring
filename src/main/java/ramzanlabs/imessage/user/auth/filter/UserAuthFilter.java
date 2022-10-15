@@ -85,8 +85,6 @@ public class UserAuthFilter extends OncePerRequestFilter {
         return request.getServletPath().equals("/user/create");
     }
 
-
-
     private void unauthorizeResponse(HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write("UNAUTHORIZED");

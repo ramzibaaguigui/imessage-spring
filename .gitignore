@@ -34,3 +34,5 @@ build/
 
 ### Node ###
 node_modules/
+/uploads
+/src/main/resources/email.properties

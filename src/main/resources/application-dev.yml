@@ -9,3 +9,6 @@ spring:
       static-locations: file:src/main/resources/static/
       cache:
         period: 0
+logging:
+  level:
+    root: debug

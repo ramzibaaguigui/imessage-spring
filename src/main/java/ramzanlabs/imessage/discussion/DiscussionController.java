@@ -21,12 +21,15 @@ import java.util.Set;
 @Controller
 public class DiscussionController {
 
-    @Autowired
-    DiscussionService discussionService;
+    private final DiscussionService discussionService;
+    private final UserService userService;
 
     @Autowired
-    UserService userService;
-
+    public DiscussionController(DiscussionService discussionService,
+                                UserService userService) {
+        this.userService = userService;
+        this.discussionService = discussionService;
+    }
     @PostMapping("/discussion/create")
     public ResponseEntity<?> createDiscussion(@RequestBody CreateDiscussionRequestPayload createDiscussionRequestPayload,
                                               @RequestHeader(Headers.USER_AUTH_TOKEN) String authToken,

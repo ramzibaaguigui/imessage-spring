@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 public class Link {
-
+    
     @Column(name = "id", unique = true)
     @JsonIgnore
     @Id
